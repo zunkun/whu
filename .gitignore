@@ -1,0 +1,5 @@
+node_modules
+public/images/*.jpg
+public/files/upload/*.xlsx
+public/apidoc/*
+package-lock.json
