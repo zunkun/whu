@@ -3,9 +3,9 @@ const { DataTypes, Model } = require('sequelize');
 const Questionnaries = require('./Questionnaires');
 
 // 问卷选项详细信息
-class Options extends Model {}
+class QueOptions extends Model {}
 
-Options.init({
+QueOptions.init({
 	sequence: {
 		type: DataTypes.INTEGER,
 		comment: '选项排序'
@@ -30,18 +30,22 @@ Options.init({
 	video: {
 		type: DataTypes.STRING,
 		comment: '视屏名称'
+	},
+	timestamp: {
+		type: DataTypes.BIGINT,
+		comment: '数据流水'
 	}
 }, {
 	sequelize: mysql,
-	modelName: 'Options',
+	modelName: 'queoptions',
 	comment: '问卷选项信息',
 	paranoid: true
 });
 
 // 与问卷主信息表关系
-Questionnaries.hasMany(Options);
-Options.belongsTo(Questionnaries);
+Questionnaries.hasMany(QueOptions);
+QueOptions.belongsTo(Questionnaries);
 
-Options.sync();
+QueOptions.sync();
 
-module.exports = Options;
+module.exports = QueOptions;

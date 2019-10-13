@@ -34,8 +34,8 @@ Votes.init({
 		comment: '投票时间'
 	},
 	checkedIds: {
-		type: DataTypes.ARRAY(DataTypes.INTEGER),
-		comment: '投票人选择选项表ID，参看 Options表, 比如 {1, 2, 3}'
+		type: DataTypes.STRING,
+		comment: '投票人选择选项表ID，参看 Options表'
 	},
 	comment: {
 		type: DataTypes.STRING,
@@ -48,7 +48,7 @@ Votes.init({
 	}
 }, {
 	sequelize: mysql,
-	modelName: 'Votes',
+	modelName: 'votes',
 	comment: '问卷选项信息',
 	paranoid: true
 });

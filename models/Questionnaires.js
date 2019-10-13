@@ -1,5 +1,5 @@
 const mysql = require('../core/db/mysql');
-const { DataTypes, Model } = require('sequelize');
+const {	DataTypes,	Model } = require('sequelize');
 
 // 问卷信息，本系统前端为投票
 class Questionnaires extends Model {}
@@ -64,13 +64,17 @@ Questionnaires.init({
 		defaultValue: 1
 	},
 	depts: {
-		type: DataTypes.ARRAY(DataTypes.JSON),
-		comment: '参与人员范围,即分会deptId, deptName {deptId: \'\', deptName: \'\'} 空则为所有分会，否则为特定分会表'
+		type: DataTypes.JSON,
+		comment: '参与人员范围,即分会deptId, deptName 空则为所有分会，否则为特定分会表'
 	},
 	status: {
 		type: DataTypes.INTEGER,
 		defaultValue: 1,
 		comment: '状态 1-进行中 2-已结束 3-已下架'
+	},
+	timestamp: {
+		type: DataTypes.BIGINT,
+		comment: '数据流水'
 	}
 }, {
 	sequelize: mysql,
@@ -79,17 +83,20 @@ Questionnaires.init({
 	paranoid: true
 });
 
-Questionnaires.sync()
-	.then(() => {
-		// 处理id,id从10000开始自增
-		return mysql.query('SELECT MAX(id) AS MAXID from questionnaires')
-			.then(data => {
-				let MAXID = data[0].MAXID;
-				if (!MAXID || MAXID < 10000) {
-					return mysql.query('ALTER TABLE questionnaires AUTO_INCREMENT=10000;');
-				}
-				return Promise.resolve();
-			});
-	});
+Questionnaires.sync().then(() => {
+	console.log(456);
+});
+// .then(() => {
+// 	console.log(555555555)
+// 	// 处理id,id从1000开始自增
+// 	return mysql.query('SELECT setval(\'questionnaires_id_seq\', max(id)) FROM questionnaires;	')
+// 		.then(data => {
+// 			let setval = Number(data[0][0].setval);
+// 			if (setval < 1000) {
+// 				return mysql.query('SELECT setval(\'questionnaires_id_seq\', 1000, true);');
+// 			}
+// 			return Promise.resolve();
+// 		});
+// });
 
 module.exports = Questionnaires;

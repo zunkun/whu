@@ -32,8 +32,8 @@ router.get('/jsconfig', async (ctx, next) => {
 * @api {get} /api/auth/signature?platform=&url= 签名
 * @apiName signature
 * @apiGroup 鉴权
-* @apiDescription 签名
-* @apiParam {String} platform 生成签名的平台, mobile-移动端 pc-PC端
+* @apiDescription 签名，所有平台公用一个接口，不同的是 platform和url参数不同
+* @apiParam {String} platform 生成签名的平台, 例如 vote_mobile-投票移动端 vote_pc 投票PC端
 * @apiParam {String} url 当前网页的URL，不包含#及其后面部分
 * @apiSuccess {Number} errcode 成功为0
 * @apiSuccess {Object} data 项目列表
@@ -59,7 +59,7 @@ router.get('/signature', async (ctx, next) => {
 });
 
 /**
-* @api {get} /api/auth/login?code=:code&userId= 用户登录
+* @api {get} /api/auth/login?code=&userId= 用户登录
 * @apiName login
 * @apiGroup 鉴权
 * @apiDescription 用户登录

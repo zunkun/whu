@@ -3,7 +3,7 @@ const { Op } = require('sequelize');
 const Router = require('koa-router');
 const router = new Router();
 const Questionnaires = require('../models/Questionnaires');
-const Options = require('../models/Options');
+const QueOptions = require('../models/QueOptions');
 const jwt = require('jsonwebtoken');
 const DeptService = require('../services/DeptService');
 
@@ -21,8 +21,8 @@ router.prefix('/api/questionnaires');
 * @apiParam {Number} [status] 状态 0-编辑中 10-进行中 20-已结束 30-已下架
 * @apiParam {String} [userName] 发起人姓名
 * @apiParam {String} [phone] 发起人手机号
-* @apiParam {String} [startTime] 开始日期,格式 2019-09-24
-* @apiParam {String} [endTime] 截止日期，格式 2019-09-30
+* @apiParam {String} [startDate] 开始日期,格式 2019-09-24
+* @apiParam {String} [endDate] 截止日期，格式 2019-09-30
 * @apiSuccess {Number} errcode 成功为0
 * @apiSuccess {Object} data 投票问卷列表
 * @apiSuccess {Number} data.count 投票问卷总数
@@ -52,16 +52,16 @@ router.get('/', async (ctx, next) => {
 	[ 'title', 'userName', 'phone' ].map(key => {
 		if (query[key]) where[key] = { [Op.like]: `%${key}%` };
 	});
-	if (query.status) where.status = query.status;
-	if (query.startTime) {
-		let time = new Date(query.startTime);
+	if (query.status) where.status = Number(query.status);
+	if (query.startDate) {
+		let time = new Date(query.startDate);
 		time.setHours(0, 0, 0, 0);
-		where.startTime = { [Op.gte]: time };
+		where.createdTime = { [Op.gte]: time };
 	}
-	if (query.endTime) {
-		let time = new Date(query.endTime);
+	if (query.endDate) {
+		let time = new Date(query.endDate);
 		time.setHours(23, 59, 59, 59);
-		where.startTime = { [Op.lte]: time };
+		where.createdTime = { [Op.lte]: time };
 	}
 
 	const res = await Questionnaires.findAndCountAll({
@@ -123,7 +123,8 @@ router.post('/', async (ctx, next) => {
 		ctx.body = ResService.fail('参数不正确');
 		return;
 	}
-	const dataKeys = new Map(Object.keys(data));
+	const timestamp = Date.now();
+	const dataKeys = new Set(Object.keys(data));
 
 	// 问卷数据，参看Questionnaire model
 	const queData = {
@@ -134,16 +135,16 @@ router.post('/', async (ctx, next) => {
 		video: data.video,
 		userId: user.userId,
 		userName: user.userName,
-		phone: user.phone,
+		phone: user.mobile || user.phone,
 		commentAllowed: dataKeys.has('commentAllowed') ? !!data.commentAllowed : true,
 		commentVisible: dataKeys.has('commentVisible') ? !!data.commentVisible : true,
 		anonymous: dataKeys.has('anonymous') ? !!data.anonymous : false,
 		realTimeVisiable: dataKeys.has('realTimeVisiable') ? !!data.realTimeVisiable : true,
 		selectionNum: Number(data.selectionNum) || 1,
-		status: 1
+		status: 1,
+		timestamp
 	};
 	const depts = [];
-
 	if (data.deptIds && data.deptIds.length) {
 		for (let deptId of data.deptIds) {
 			const dept = await DeptService.getDeptInfo(deptId);
@@ -158,7 +159,7 @@ router.post('/', async (ctx, next) => {
 	// 存储选项信息
 	let optionDatas = [];
 	for (let option of options) {
-		const optionData = { questionnaireId: questionnaire.id };
+		const optionData = { questionnaireId: questionnaire.id, timestamp };
 		[ 'sequence', 'type', 'title', 'description', 'image', 'video' ].map(key => {
 			if (option[key]) {
 				optionData[key] = option[key];
@@ -167,7 +168,7 @@ router.post('/', async (ctx, next) => {
 		optionDatas.push(optionData);
 	}
 
-	await Options.bulkCreate(optionDatas);
+	await QueOptions.bulkCreate(optionDatas);
 
 	ctx.body = ResService.success({ id: questionnaire.id });
 	await next();
@@ -215,21 +216,11 @@ router.post('/', async (ctx, next) => {
 * @apiError {Number} errmsg 错误消息
 */
 router.get('/:id', async (ctx, next) => {
-	return Questionnaires.findOne({
-		where: { id: ctx.params.id },
-		include: [ { model: Options, as: 'options' } ]
-	}).then(res => {
-		if (res) {
-			ctx.body = ResService.getSuccess(res);
-		} else {
-			ctx.body = ResService.getFail('参数错误');
-		}
-		next();
-	}).catch(error => {
-		console.error('获取投票问卷信息失败', error);
-		ctx.body = ResService.getFail('获取投票问卷信息失败');
-		next();
-	});
+	let que = await Questionnaires.findOne({ where: { id: ctx.params.id } });
+	que = que.toJSON();
+	que.options = await QueOptions.findAll({ where: { questionnaireId: que.id, timestamp: que.timestamp } });
+	ctx.body = ResService.success(que);
+	await next();
 });
 
 /**
@@ -273,10 +264,10 @@ router.put('/:id', async (ctx, next) => {
 		ctx.body = ResService.fail('系统中没有该问卷投票');
 		return;
 	}
+	const timestamp = Date.now();
+	const dataKeys = new Set(Object.keys(data));
 
-	const dataKeys = new Map(Object.keys(data));
-
-	const queData = {};
+	const queData = { timestamp };
 	[ 'title', 'description', 'video', 'selectionNum' ].map(key => {
 		if (data[key]) queData[key] = data[key];
 	});
@@ -313,18 +304,21 @@ router.put('/:id', async (ctx, next) => {
 	// 更新选项数据
 	const options = data.options || [];
 	for (let option of options) {
-		const optionData = { questionnaireId: questionnaire.id };
+		const optionData = { questionnaireId: questionnaire.id, timestamp };
 		[ 'id', 'sequence', 'type', 'title', 'description', 'image', 'video' ].map(key => {
 			if (option[key]) {
 				optionData[key] = option[key];
 			}
 		});
 		if (!option.id) {
-			await Options.create(optionData);
+			await QueOptions.create(optionData);
 			continue;
 		}
-		await Options.update(optionData, { where: { id: option.id } });
+		await QueOptions.update(optionData, { where: { id: option.id } });
 	}
+	// 删除旧版本选项
+	await QueOptions.destroy({ where: { questionnaireId: ctx.params.id, timestamp: { [Op.ne]: timestamp } } });
+	ctx.body = ResService.success({ id: ctx.params.id });
 });
 
 /**
@@ -343,13 +337,13 @@ router.put('/:id', async (ctx, next) => {
 router.post('/status', async (ctx, next) => {
 	const { id, status } = ctx.request.body;
 
-	return Questionnaires.update({ status: Number(status), where: { id } })
+	return Questionnaires.update({ status: Number(status) }, { where: { id } })
 		.then(() => {
-			ctx.body = ResService.getSuccess({});
+			ctx.body = ResService.success({});
 			next();
 		}).catch(error => {
 			console.error('设置投票问卷当前状态失败', error);
-			ctx.body = ResService.getFail('设置失败');
+			ctx.body = ResService.fail('设置失败');
 			next();
 		});
 });

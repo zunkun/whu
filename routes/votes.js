@@ -4,7 +4,7 @@ const Router = require('koa-router');
 const router = new Router();
 const Votes = require('../models/Votes');
 const Questionnaires = require('../models/Questionnaires');
-const Options = require('../models/Options');
+const QueOptions = require('../models/QueOptions');
 const jwt = require('jsonwebtoken');
 const moment = require('moment');
 const voteSet = new Set();
@@ -19,7 +19,7 @@ router.prefix('/api/votes');
 * @apiParam {Number} questionnaireId 活动ID
 * @apiParam {Number[]} checkedIds 投票选项ID, 示例单选 [1],多选 [1, 2, 3]
 
-* @apiParam {String} comment 评论
+* @apiParam {String} [comment] 评论
 * @apiSuccess {Number} errcode 成功为0
 * @apiSuccess {Object} data 投票问卷信息
 * @apiSuccess {Number} data.id 投票问卷ID
@@ -29,6 +29,7 @@ router.prefix('/api/votes');
 router.post('/', async (ctx, next) => {
 	let user = jwt.decode(ctx.header.authorization.substr(7));
 	const data = ctx.request.body;
+	console.log({ data });
 	if (!data.questionnaireId || !Array.isArray(data.checkedIds) || !data.checkedIds.length) {
 		ctx.body = ResService.fail('参数不正确');
 		return;
@@ -44,8 +45,8 @@ router.post('/', async (ctx, next) => {
 	// 投票数据
 	const voteData = {
 		questionnaireId: data.questionnaireId,
-		userId: user.id,
-		userName: user.name,
+		userId: user.userId,
+		userName: user.userName,
 		phone: user.phone,
 		avatar: user.avatar,
 		voteTime
@@ -69,9 +70,9 @@ router.post('/', async (ctx, next) => {
 						return Promise.reject('不在投票区间');
 					}
 					if (que.selectionNum === 1) {
-						voteData.checkedIds = [ data.checkedIds[0] ];
+						voteData.checkedIds = data.checkedIds[0];
 					} else {
-						voteData.checkedIds = data.checkedIds;
+						voteData.checkedIds = data.checkedIds.join('|');
 					}
 					return Votes.create(voteData);
 				});
@@ -156,13 +157,13 @@ router.get('/comments', async (ctx, next) => {
 	let page = Number(query.page) || 1;
 	let limit = Number(query.limit) || 10;
 	let offset = (page - 1) * limit;
-	if (query.questionnaireId) {
+	if (!query.questionnaireId) {
 		ctx.body = ResService.fail('参数错误');
 		return;
 	}
 	const where = { questionnaireId: query.questionnaireId, comment: { [Op.ne]: null } };
 
-	const queryKeys = new Map(Object.keys(query));
+	const queryKeys = new Set(Object.keys(query));
 	if (queryKeys.has('status')) where.statsu = Number(query.status);
 
 	return Votes.findAndCountAll({ where, limit, offset }).then(votes => {
@@ -218,13 +219,14 @@ router.get('/comments', async (ctx, next) => {
 router.get('/options', async (ctx, next) => {
 	const { questionnaireId } = ctx.query;
 
-	const options = await Options.findAll({ where: { questionnaireId } });
+	const options = await QueOptions.findAll({ where: { questionnaireId } });
 	let ticketCount = 0; // 总票数
 	let personCount = await Votes.count({ where: { questionnaireId } }); // 总投票人数
 	let optionRes = [];
 	for (let option of options) {
-		let voteDatas = await Votes.findAndCountAll({	where: { questionnaireId, checkedIds: { [Op.in]: option.id } } });
-		ticketCount += ticketCount.count;
+		let voteDatas = await Votes.findAndCountAll({	where: { questionnaireId, checkedIds: { [Op.regexp]: `${option.id}||${option.id}|` } } });
+		console.log({ voteDatas });
+		ticketCount += voteDatas.count;
 		optionRes.push({
 			option,
 			count: voteDatas.count, // 当前选项投票票数
@@ -242,6 +244,7 @@ router.get('/options', async (ctx, next) => {
 		}
 		optionRes[optionRes.length - 1].percent = 1 - percentCount;
 	}
+	console.log({ ticketCount, personCount });
 	ctx.body = ResService.success({
 		ticketCount,
 		personCount,
@@ -264,7 +267,7 @@ router.get('/options', async (ctx, next) => {
 * @apiError {Number} errcode 失败不为0
 * @apiError {Number} errmsg 错误消息
 */
-router.post('/commentsOut', async (ctx, next) => {
+router.get('/commentsOut', async (ctx, next) => {
 	const { questionnaireId } = ctx.query;
 	const where = { questionnaireId, comment: { [Op.ne]: null } };
 	const comments = [];
@@ -323,7 +326,7 @@ router.get('/participate', async (ctx, next) => {
 	}
 
 	const res = await Questionnaires.findAndCountAll({
-		where: { questionnaireId: { [Op.in]: questionnaireIds } },
+		where: { id: { [Op.in]: questionnaireIds } },
 		limit,
 		offset,
 		attributes: [ 'id', 'title', 'description', 'status', 'userId', 'userName', 'phone', 'createdAt', 'startTime', 'endTime', 'depts' ],

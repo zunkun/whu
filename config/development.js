@@ -1,8 +1,15 @@
 module.exports = {
 	PORT: 3000,
 	mysql: {
-		host: '127.0.0.1',
+		host: '119.27.170.247',
 		port: 3306,
+		database: 'whu',
+		username: 'root',
+		password: '!Asbcd1234'
+	},
+	postgres: {
+		host: '119.27.170.247',
+		port: 5432,
 		database: 'whu',
 		username: 'root',
 		password: 'abcd1234'
@@ -12,12 +19,12 @@ module.exports = {
 	dingBaseUri: 'https://oapi.dingtalk.com',
 	corpId: 'dingcbcbb63d3edd5478',
 	corpName: '上海铭悦软件有限公司',
-	agentId: '271444139',
-	appkey: 'ding9vrsww4git23xdod',
-	appsecret: 'GMVTGc5ZpnNXjqruYrucjXxqaS29Rnj6Q37tP1utg57YeUH3V-Tc4tASEcyuLIWr',
+	agentId: '302567497',
+	appkey: 'dingi36m7pcjlcqapbci',
+	appsecret: 'rL9MrWWxdIaFquO-LtMKHsg_kAD8eMggbRAufVbCPCjtu-5iyE8RKi3C5nMln-lq',
 	nonceStr: 'afasdzwe',
 	deptCron: '0 0 6 * * *', // 每日6时同步部门列表
 	roleCron: '0 0 */1 * *', // 每隔1个小时同步角色列表
-	imagePath: 'C:\\Users\\liuzu\\Pictures',
-	videoPath: 'C:\\Users\\liuzu\\Videos'
+	videoPath: '/apps/files/videos/',
+	imagePath: '/apps/files/images/'
 };

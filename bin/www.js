@@ -1,35 +1,20 @@
 #!/usr/bin/env node
 require('console-stamp')(console, { pattern: 'yyyy-mm-dd\'T\'HH:MM:ss:l' });
-
-const fs = require('fs');
-const path = require('path');
-var options;
+// require('../services/init');
 if (process.env.NODE_ENV === 'production') {
 	console.log('正式环境');
-	options = {
-		key: fs.readFileSync(path.join(__dirname, '../config/ssl/production/iss.key')),
-		cert: fs.readFileSync(path.join(__dirname, '../config/ssl/production/iss.crt'))
-	};
 } else {
 	console.log('测试环境');
-	options = {
-		key: fs.readFileSync(path.join(__dirname, '../config/ssl/development/iss.key')),
-		cert: fs.readFileSync(path.join(__dirname, '../config/ssl/development/iss.crt'))
-	};
 }
 
-const config = require('../config');
 const app = require('../app');
-const https = require('https');
-const { default: enforceHttps } = require('koa-sslify');
+const http = require('http');
 
-app.use(enforceHttps({
-	port: config.PORT
-}));
+const config = require('../config');
 
-const port = process.env.PORT || config.PORT || 3000;
-const server = https.createServer(options, app.callback());
+const port = process.env.PORT || config.PORT || 4000;
 
+const server = http.createServer(app.callback());
 server.listen(port);
 server.on('error', onError);
 server.on('listening', onListening);
@@ -56,11 +41,6 @@ function onError (error) {
 }
 
 function onListening () {
-	const addr = this.address();
-	const bind = typeof addr === 'string'
-		? 'pipe ' + addr
-		: 'port ' + addr.port;
-	console.log('Listening on ' + bind);
+	console.log('Listening on ' + port);
 }
-
 module.exports = server;
