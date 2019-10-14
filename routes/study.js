@@ -76,3 +76,5 @@ router.post('/store', async (ctx, next) => {
 	ctx.body = ResService.success({ id: store.id });
 	await next();
 });
+
+module.exports = router;
