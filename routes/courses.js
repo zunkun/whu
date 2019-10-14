@@ -113,7 +113,8 @@ router.post('/', async (ctx, next) => {
 		teacherDesc,
 		userId: user.userId,
 		userName: user.userName,
-		status: 1
+		status: 1,
+		publishTime: new Date()
 	});
 
 	const timestamp = Date.now();
@@ -138,7 +139,7 @@ router.post('/', async (ctx, next) => {
 
 /**
 * @api {put} /api/courses/:id 编辑课程
-* @apiName course-submit
+* @apiName course-edit
 * @apiGroup 课程管理
 * @apiDescription 编辑课程，其中id为课程ID,写在param中，body数据为课程信息
 * @apiHeader {String} authorization 登录token
@@ -237,15 +238,15 @@ router.put('/:id', async (ctx, next) => {
 });
 
 /**
-* @api {get} /api/courses?limit=&page=&keywords=&title=&startDay=&endDay=coursetypeId=&status=获取课程详情信息
-* @apiName course-detail
+* @api {get} /api/courses?limit=&page=&keywords=&title=&startDay=&endDay=coursetypeId=&status= 获取课程列表
+* @apiName course-lists
 * @apiGroup 课程管理
-* @apiDescription 获取课程详情
+* @apiDescription 课程列表
 * @apiHeader {String} authorization 登录token
 * @apiParam {Number} [page] 当前页码，默认1
 * @apiParam {Number} [limit] 每页条数，默认10
 * @apiParam {String} [keywords] 关键字，可以按照关键字查询
-* @apiParam {Number} [status] 课程状态 1-已上线课程 2-已下线课程，默认查询所有状态课程
+* @apiParam {Number} [status] 课程状态 0-未设置 1-已上线课程 2-已下线课程，默认查询所有状态课程
 * @apiParam {Date} [startDay] 创建时间开始日期，例如 2019-09-03
 * @apiParam {Date} [endDay] 创建时间结束日期，例如 2019-09-03
 * @apiParam {Date} [coursetypeId] 课程类型ID
@@ -342,7 +343,7 @@ router.get('/', async (ctx, next) => {
 
 router.get('/:id', async (ctx, next) => {
 	const id = ctx.params.id;
-	const courseMain = await Courses.findOne({ where: { id }, attributes: { exclude: [ 'status' ] } });
+	const courseMain = await Courses.findOne({ where: { id } });
 	if (!courseMain) {
 		ctx.body = ResService.fail('无法获取课程详情');
 		return;
@@ -358,6 +359,50 @@ router.get('/:id', async (ctx, next) => {
 	courseMain.courses = courses;
 
 	ctx.body = ResService.success(courseMain);
+	await next();
+});
+
+/**
+* @api {post} /api/courses/status 上线下线
+* @apiName course-status
+* @apiGroup 课程管理
+* @apiDescription 设置课程状态，上线下线操作
+* @apiHeader {String} authorization 登录token
+* @apiParam {Number[]} courseIds 课程id数组 例如[1, 2]
+* @apiParam {Number} status 1-上线 2-下线
+* @apiSuccess {Number} errcode 成功为0
+* @apiSuccess {Object} data {}
+* @apiError {Number} errcode 失败不为0
+* @apiError {Number} errmsg 错误消息
+*/
+router.post('/status', async (ctx, next) => {
+	let { courseIds, status } = ctx.request.body;
+	status = Number(status);
+	let value = { status };
+	if (status === 1) value.publishTime = new Date();
+	if (status === 2) value.offlineTime = new Date();
+	await CourseMain.update({ status: Number(status) }, { where: { id: { [Op.in]: courseIds } } });
+	ctx.body = ResService.success({});
+	await next();
+});
+
+/**
+* @api {post} /api/courses/:id 删除课程
+* @apiName course-remove
+* @apiGroup 课程管理
+* @apiDescription 删除课程
+* @apiHeader {String} authorization 登录token
+* @apiParam {Number} id 课程id
+* @apiSuccess {Number} errcode 成功为0
+* @apiSuccess {Object} data {}
+* @apiError {Number} errcode 失败不为0
+* @apiError {Number} errmsg 错误消息
+*/
+
+router.delete('/:id', async (ctx, next) => {
+	let id = ctx.params.id;
+	await CourseMain.destroy({ where: { id } });
+	ctx.body = ResService.success({});
 	await next();
 });
 

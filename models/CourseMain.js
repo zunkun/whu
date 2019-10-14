@@ -41,10 +41,18 @@ CourseMain.init({
 		type: DataTypes.STRING,
 		comment: '创建人userName'
 	},
+	publishTime: {
+		type: DataTypes.DATE,
+		comment: '上线时间'
+	},
+	offlineTime: {
+		type: DataTypes.DATE,
+		comment: '下线时间'
+	},
 	status: {
 		type: DataTypes.INTEGER,
-		defaultValue: 1,
-		comment: '课程状态 1-上线课程  2-下线课程'
+		defaultValue: 0,
+		comment: '课程状态 0-未设置 1-上线课程  2下线课程 3-删除课程'
 	}
 }, { sequelize: mysql, modelName: 'coursemains', timestamps: false, paranoid: true, comment: '课程信息主表' });
 

@@ -3,7 +3,7 @@
   "version": "1.0.0",
   "description": "武大投票服务端",
   "title": "武大投票服务端",
-  "url" : "https://119.27.170.247:3000",
+  "url" : "http://119.27.170.247:3000",
   "header": {
     "title": "武大投票服务端",
     "filename": "./docs/API.md"
