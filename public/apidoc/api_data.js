@@ -1877,9 +1877,9 @@ define({ "api": [
   },
   {
     "type": "post",
-    "url": "/api/questionnaires/status",
+    "url": "/api/questionnaires/top",
     "title": "置顶操作",
-    "name": "questionnaires_status",
+    "name": "questionnaires_top",
     "group": "投票问卷管理",
     "description": "<p>置顶操作</p>",
     "header": {

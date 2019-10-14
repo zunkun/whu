@@ -349,8 +349,8 @@ router.post('/status', async (ctx, next) => {
 });
 
 /**
-* @api {post} /api/questionnaires/status 置顶操作
-* @apiName questionnaires-status
+* @api {post} /api/questionnaires/top 置顶操作
+* @apiName questionnaires-top
 * @apiGroup 投票问卷管理
 * @apiDescription 置顶操作
 * @apiHeader {String} authorization 登录token
@@ -361,7 +361,7 @@ router.post('/status', async (ctx, next) => {
 * @apiError {Number} errcode 失败不为0
 * @apiError {Number} errmsg 错误消息
 */
-router.post('/status', async (ctx, next) => {
+router.post('/top', async (ctx, next) => {
 	let { questionnaireIds, top } = ctx.request.body;
 	top = !!top;
 	return Questionnaires.update({ top }, { where: { id: { [Op.in]: questionnaireIds } } })
