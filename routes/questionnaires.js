@@ -18,7 +18,7 @@ router.prefix('/api/questionnaires');
 * @apiParam {Number} [limit] 分页条数，默认10
 * @apiParam {Number} [page] 第几页，默认1
 * @apiParam {String} [title] 活动标题
-* @apiParam {Number} [status] 状态 0-编辑中 10-进行中 20-已结束 30-已下架
+* @apiParam {Number} [status] 状态 0-编辑中 1-进行中 2-已结束 3-已下架
 * @apiParam {String} [userName] 发起人姓名
 * @apiParam {String} [phone] 发起人手机号
 * @apiParam {String} [startDate] 开始日期,格式 2019-09-24
@@ -69,7 +69,7 @@ router.get('/', async (ctx, next) => {
 		limit,
 		offset,
 		attributes: [ 'id', 'title', 'description', 'status', 'userId', 'userName', 'phone', 'createdAt', 'startTime', 'endTime', 'depts' ],
-		order: [ [ 'createdAt', 'DESC' ] ]
+		order: [ [ 'top', 'DESC' ], [ 'createdAt', 'DESC' ] ]
 	});
 	ctx.body = ResService.success(res);
 	await next();
@@ -327,7 +327,7 @@ router.put('/:id', async (ctx, next) => {
 * @apiGroup 投票问卷管理
 * @apiDescription 设置当前状态 当前投票问卷数据状态 1-启用 2-停用中
 * @apiHeader {String} authorization 登录token
-* @apiParam {Number} id 投票问卷id
+* @apiParam {Number[]} questionnaireIds 投票问卷id表，例如 [1,2,3]
 * @apiParam {Number} status 1-进行中 2-已结束 3-已下架
 * @apiSuccess {Number} errcode 成功为0
 * @apiSuccess {Object} data {}
@@ -335,9 +335,36 @@ router.put('/:id', async (ctx, next) => {
 * @apiError {Number} errmsg 错误消息
 */
 router.post('/status', async (ctx, next) => {
-	const { id, status } = ctx.request.body;
+	const { questionnaireIds, status } = ctx.request.body;
 
-	return Questionnaires.update({ status: Number(status) }, { where: { id } })
+	return Questionnaires.update({ status: Number(status) }, { where: { id: { [Op.in]: questionnaireIds } } })
+		.then(() => {
+			ctx.body = ResService.success({});
+			next();
+		}).catch(error => {
+			console.error('设置投票问卷当前状态失败', error);
+			ctx.body = ResService.fail('设置失败');
+			next();
+		});
+});
+
+/**
+* @api {post} /api/questionnaires/status 置顶操作
+* @apiName questionnaires-status
+* @apiGroup 投票问卷管理
+* @apiDescription 置顶操作
+* @apiHeader {String} authorization 登录token
+* @apiParam {Number[]} questionnaireIds 投票问卷id表，例如 [1,2,3]
+* @apiParam {Number} [top] false-不置顶 true-置顶, 默认 false 不置顶
+* @apiSuccess {Number} errcode 成功为0
+* @apiSuccess {Object} data {}
+* @apiError {Number} errcode 失败不为0
+* @apiError {Number} errmsg 错误消息
+*/
+router.post('/status', async (ctx, next) => {
+	let { questionnaireIds, top } = ctx.request.body;
+	top = !!top;
+	return Questionnaires.update({ top }, { where: { id: { [Op.in]: questionnaireIds } } })
 		.then(() => {
 			ctx.body = ResService.success({});
 			next();

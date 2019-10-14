@@ -1616,7 +1616,7 @@ define({ "api": [
             "type": "Number",
             "optional": true,
             "field": "status",
-            "description": "<p>状态 0-编辑中 10-进行中 20-已结束 30-已下架</p>"
+            "description": "<p>状态 0-编辑中 1-进行中 2-已结束 3-已下架</p>"
           },
           {
             "group": "Parameter",
@@ -1816,10 +1816,10 @@ define({ "api": [
         "Parameter": [
           {
             "group": "Parameter",
-            "type": "Number",
+            "type": "Number[]",
             "optional": false,
-            "field": "id",
-            "description": "<p>投票问卷id</p>"
+            "field": "questionnaireIds",
+            "description": "<p>投票问卷id表，例如 [1,2,3]</p>"
           },
           {
             "group": "Parameter",
@@ -1874,6 +1874,265 @@ define({ "api": [
     "version": "0.0.0",
     "filename": "routes/questionnaires.js",
     "groupTitle": "投票问卷管理"
+  },
+  {
+    "type": "post",
+    "url": "/api/questionnaires/status",
+    "title": "置顶操作",
+    "name": "questionnaires_status",
+    "group": "投票问卷管理",
+    "description": "<p>置顶操作</p>",
+    "header": {
+      "fields": {
+        "Header": [
+          {
+            "group": "Header",
+            "type": "String",
+            "optional": false,
+            "field": "authorization",
+            "description": "<p>登录token</p>"
+          }
+        ]
+      }
+    },
+    "parameter": {
+      "fields": {
+        "Parameter": [
+          {
+            "group": "Parameter",
+            "type": "Number[]",
+            "optional": false,
+            "field": "questionnaireIds",
+            "description": "<p>投票问卷id表，例如 [1,2,3]</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "Number",
+            "optional": true,
+            "field": "top",
+            "description": "<p>false-不置顶 true-置顶, 默认 false 不置顶</p>"
+          }
+        ]
+      }
+    },
+    "success": {
+      "fields": {
+        "Success 200": [
+          {
+            "group": "Success 200",
+            "type": "Number",
+            "optional": false,
+            "field": "errcode",
+            "description": "<p>成功为0</p>"
+          },
+          {
+            "group": "Success 200",
+            "type": "Object",
+            "optional": false,
+            "field": "data",
+            "description": "<p>{}</p>"
+          }
+        ]
+      }
+    },
+    "error": {
+      "fields": {
+        "Error 4xx": [
+          {
+            "group": "Error 4xx",
+            "type": "Number",
+            "optional": false,
+            "field": "errcode",
+            "description": "<p>失败不为0</p>"
+          },
+          {
+            "group": "Error 4xx",
+            "type": "Number",
+            "optional": false,
+            "field": "errmsg",
+            "description": "<p>错误消息</p>"
+          }
+        ]
+      }
+    },
+    "version": "0.0.0",
+    "filename": "routes/questionnaires.js",
+    "groupTitle": "投票问卷管理"
+  },
+  {
+    "type": "post",
+    "url": "/api/study/store",
+    "title": "收藏取消课程",
+    "name": "study_store_manage",
+    "group": "课程学习",
+    "description": "<p>收藏/取消收藏课程</p>",
+    "header": {
+      "fields": {
+        "Header": [
+          {
+            "group": "Header",
+            "type": "String",
+            "optional": false,
+            "field": "authorization",
+            "description": "<p>登录token</p>"
+          }
+        ]
+      }
+    },
+    "parameter": {
+      "fields": {
+        "Parameter": [
+          {
+            "group": "Parameter",
+            "type": "Number",
+            "optional": false,
+            "field": "coursemainId",
+            "description": "<p>课程主数据ID</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "Number",
+            "optional": false,
+            "field": "status",
+            "description": "<p>操作 1-收藏 2-取消收藏</p>"
+          }
+        ]
+      }
+    },
+    "success": {
+      "fields": {
+        "Success 200": [
+          {
+            "group": "Success 200",
+            "type": "Number",
+            "optional": false,
+            "field": "errcode",
+            "description": "<p>成功为0</p>"
+          },
+          {
+            "group": "Success 200",
+            "type": "Object",
+            "optional": false,
+            "field": "data",
+            "description": "<p>投票问卷信息</p>"
+          },
+          {
+            "group": "Success 200",
+            "type": "Number",
+            "optional": true,
+            "field": "data.id",
+            "description": "<p>收藏做做返回此值收藏数据ID</p>"
+          }
+        ]
+      }
+    },
+    "error": {
+      "fields": {
+        "Error 4xx": [
+          {
+            "group": "Error 4xx",
+            "type": "Number",
+            "optional": false,
+            "field": "errcode",
+            "description": "<p>失败不为0</p>"
+          },
+          {
+            "group": "Error 4xx",
+            "type": "Number",
+            "optional": false,
+            "field": "errmsg",
+            "description": "<p>错误消息</p>"
+          }
+        ]
+      }
+    },
+    "version": "0.0.0",
+    "filename": "routes/study.js",
+    "groupTitle": "课程学习"
+  },
+  {
+    "type": "get",
+    "url": "/api/study/userstore",
+    "title": "个人收藏课程列表",
+    "name": "study_userstores",
+    "group": "课程学习",
+    "description": "<p>个人收藏课程列表</p>",
+    "header": {
+      "fields": {
+        "Header": [
+          {
+            "group": "Header",
+            "type": "String",
+            "optional": false,
+            "field": "authorization",
+            "description": "<p>登录token</p>"
+          }
+        ]
+      }
+    },
+    "parameter": {
+      "fields": {
+        "Parameter": [
+          {
+            "group": "Parameter",
+            "type": "Number",
+            "optional": false,
+            "field": "coursemainId",
+            "description": "<p>课程主数据ID</p>"
+          }
+        ]
+      }
+    },
+    "success": {
+      "fields": {
+        "Success 200": [
+          {
+            "group": "Success 200",
+            "type": "Number",
+            "optional": false,
+            "field": "errcode",
+            "description": "<p>成功为0</p>"
+          },
+          {
+            "group": "Success 200",
+            "type": "Object",
+            "optional": false,
+            "field": "data",
+            "description": "<p>投票问卷信息</p>"
+          },
+          {
+            "group": "Success 200",
+            "type": "Number",
+            "optional": false,
+            "field": "data.id",
+            "description": "<p>收藏数据ID</p>"
+          }
+        ]
+      }
+    },
+    "error": {
+      "fields": {
+        "Error 4xx": [
+          {
+            "group": "Error 4xx",
+            "type": "Number",
+            "optional": false,
+            "field": "errcode",
+            "description": "<p>失败不为0</p>"
+          },
+          {
+            "group": "Error 4xx",
+            "type": "Number",
+            "optional": false,
+            "field": "errmsg",
+            "description": "<p>错误消息</p>"
+          }
+        ]
+      }
+    },
+    "version": "0.0.0",
+    "filename": "routes/study.js",
+    "groupTitle": "课程学习"
   },
   {
     "type": "get",

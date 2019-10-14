@@ -72,6 +72,11 @@ Questionnaires.init({
 		defaultValue: 1,
 		comment: '状态 1-进行中 2-已结束 3-已下架'
 	},
+	top: {
+		type: DataTypes.BOOLEAN,
+		defaultValue: true,
+		comment: '是否置顶'
+	},
 	timestamp: {
 		type: DataTypes.BIGINT,
 		comment: '数据流水'
