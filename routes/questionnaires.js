@@ -50,7 +50,7 @@ router.get('/', async (ctx, next) => {
 	let where = {};
 
 	[ 'title', 'userName', 'phone' ].map(key => {
-		if (query[key]) where[key] = { [Op.like]: `%${key}%` };
+		if (query[key]) where[key] = { [Op.like]: `%${query[key]}%` };
 	});
 	if (query.status) where.status = Number(query.status);
 	if (query.startDate) {
@@ -63,7 +63,6 @@ router.get('/', async (ctx, next) => {
 		time.setHours(23, 59, 59, 59);
 		where.createdTime = { [Op.lte]: time };
 	}
-
 	const res = await Questionnaires.findAndCountAll({
 		where,
 		limit,
