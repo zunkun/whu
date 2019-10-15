@@ -71,10 +71,10 @@ Questionnaires.init({
 		type: DataTypes.ARRAY(DataTypes.JSON),
 		comment: '参与人员范围，deptId, deptName'
 	},
-	status: {
+	onoff: {
 		type: DataTypes.INTEGER,
-		defaultValue: 1,
-		comment: '状态 1-进行中 2-已结束 3-已下架'
+		defaultValue: 0,
+		comment: '状态 0-上架下架未设置 1-已上架 2-已下架'
 	},
 	top: {
 		type: DataTypes.BOOLEAN,

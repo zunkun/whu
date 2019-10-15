@@ -774,8 +774,8 @@
             "group": "Success 200",
             "type": "String",
             "optional": false,
-            "field": "data.rows.status",
-            "description": "<p>状态 状态 1-进行中 2-已结束 3-已下架</p>"
+            "field": "data.rows.onoff",
+            "description": "<p>上架下架 0-上架下架未设置 1-已上架 2-已下架</p>"
           },
           {
             "group": "Success 200",
@@ -973,13 +973,6 @@
             "optional": false,
             "field": "depts.deptName",
             "description": "<p>部门名称</p>"
-          },
-          {
-            "group": "Parameter",
-            "type": "String",
-            "optional": true,
-            "field": "status",
-            "description": "<p>状态 1-进行中 2-已结束 3-已下架</p>"
           },
           {
             "group": "Parameter",
@@ -1551,8 +1544,8 @@
             "group": "Success 200",
             "type": "String",
             "optional": false,
-            "field": "data.status",
-            "description": "<p>状态 状态 1-进行中 2-已结束 3-已下架</p>"
+            "field": "data.onoff",
+            "description": "<p>上架下架 0-上架下架未设置 1-已上架 2-已下架</p>"
           },
           {
             "group": "Success 200",
@@ -1653,7 +1646,7 @@
   },
   {
     "type": "get",
-    "url": "/api/questionnaires?limit=&page=&title=&status=&userName=&mobile=startDate=endDate=",
+    "url": "/api/questionnaires?limit=&page=&title=&status=&userName=&mobile=startDate=endDate=&startTime=&endTime=",
     "title": "投票问卷列表",
     "name": "questionnaires_lists",
     "group": "投票问卷管理",
@@ -1699,8 +1692,8 @@
             "group": "Parameter",
             "type": "Number",
             "optional": true,
-            "field": "status",
-            "description": "<p>状态 0-编辑中 1-进行中 2-已结束 3-已下架</p>"
+            "field": "onoff",
+            "description": "<p>状态 0-上架下架 0-上架下架未设置 1-已上架 2-已下架</p>"
           },
           {
             "group": "Parameter",
@@ -1721,14 +1714,28 @@
             "type": "String",
             "optional": true,
             "field": "startDate",
-            "description": "<p>开始日期,格式 2019-09-24</p>"
+            "description": "<p>开始日期,格式 2019-09-24,【已废弃】请使用 startTime</p>"
           },
           {
             "group": "Parameter",
             "type": "String",
             "optional": true,
             "field": "endDate",
-            "description": "<p>截止日期，格式 2019-09-30</p>"
+            "description": "<p>截止日期，格式 2019-09-30 【已废弃】请使用endTime</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "String",
+            "optional": true,
+            "field": "startTime",
+            "description": "<p>开始日期,格式 2019-09-24 08:00:00</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "String",
+            "optional": true,
+            "field": "endTime",
+            "description": "<p>截止日期，格式 2019-09-24 08:00:00</p>"
           }
         ]
       }
@@ -1803,8 +1810,8 @@
             "group": "Success 200",
             "type": "String",
             "optional": false,
-            "field": "data.rows.status",
-            "description": "<p>状态 状态 1-进行中 2-已结束 3-已下架</p>"
+            "field": "data.rows.onoff",
+            "description": "<p>上架下架 0-上架下架未设置 1-已上架 2-已下架</p>"
           },
           {
             "group": "Success 200",
@@ -1883,8 +1890,92 @@
     "groupTitle": "投票问卷管理"
   },
   {
+    "type": "post",
+    "url": "/api/questionnaires/onoff",
+    "title": "上架下架",
+    "name": "questionnaires_onoff",
+    "group": "投票问卷管理",
+    "description": "<p>上架下架</p>",
+    "header": {
+      "fields": {
+        "Header": [
+          {
+            "group": "Header",
+            "type": "String",
+            "optional": false,
+            "field": "authorization",
+            "description": "<p>登录token</p>"
+          }
+        ]
+      }
+    },
+    "parameter": {
+      "fields": {
+        "Parameter": [
+          {
+            "group": "Parameter",
+            "type": "Number[]",
+            "optional": false,
+            "field": "questionnaireIds",
+            "description": "<p>投票问卷id表，例如 [1,2,3]</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "Number",
+            "optional": false,
+            "field": "onoff",
+            "description": "<p>1-上架 2-下架</p>"
+          }
+        ]
+      }
+    },
+    "success": {
+      "fields": {
+        "Success 200": [
+          {
+            "group": "Success 200",
+            "type": "Number",
+            "optional": false,
+            "field": "errcode",
+            "description": "<p>成功为0</p>"
+          },
+          {
+            "group": "Success 200",
+            "type": "Object",
+            "optional": false,
+            "field": "data",
+            "description": "<p>{}</p>"
+          }
+        ]
+      }
+    },
+    "error": {
+      "fields": {
+        "Error 4xx": [
+          {
+            "group": "Error 4xx",
+            "type": "Number",
+            "optional": false,
+            "field": "errcode",
+            "description": "<p>失败不为0</p>"
+          },
+          {
+            "group": "Error 4xx",
+            "type": "Number",
+            "optional": false,
+            "field": "errmsg",
+            "description": "<p>错误消息</p>"
+          }
+        ]
+      }
+    },
+    "version": "0.0.0",
+    "filename": "routes/questionnaires.js",
+    "groupTitle": "投票问卷管理"
+  },
+  {
     "type": "get",
-    "url": "/api/questionnaires/ques?limit=&page=",
+    "url": "/api/questionnaires/ques?limit=&page=&status=",
     "title": "我可以参与的投票问卷列表",
     "name": "questionnaires_ques",
     "group": "投票问卷管理",
@@ -1918,6 +2009,13 @@
             "optional": true,
             "field": "page",
             "description": "<p>第几页，默认1</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "Number",
+            "optional": true,
+            "field": "status",
+            "description": "<p>状态，1-进行中 2-已结束,默认为1</p>"
           }
         ]
       }
@@ -1992,8 +2090,8 @@
             "group": "Success 200",
             "type": "String",
             "optional": false,
-            "field": "data.rows.status",
-            "description": "<p>状态 状态 1-进行中 2-已结束 3-已下架</p>"
+            "field": "data.rows.onoff",
+            "description": "<p>上架下架 0-上架下架未设置 1-已上架 2-已下架</p>"
           },
           {
             "group": "Success 200",
@@ -2074,10 +2172,13 @@
   {
     "type": "post",
     "url": "/api/questionnaires/status",
-    "title": "设置当前状态",
+    "title": "【废弃】设置当前状态",
     "name": "questionnaires_status",
+    "deprecated": {
+      "content": "请查看(#投票问卷管理:questionnaires-onoff)."
+    },
     "group": "投票问卷管理",
-    "description": "<p>设置当前状态 当前投票问卷数据状态 1-启用 2-停用中</p>",
+    "description": "<p>设置当前状态 当前投票问卷数据状态 1-上架 2-下架，新的为 onoff</p>",
     "header": {
       "fields": {
         "Header": [
@@ -2106,7 +2207,7 @@
             "type": "Number",
             "optional": false,
             "field": "status",
-            "description": "<p>1-进行中 2-已结束 3-已下架</p>"
+            "description": "<p>1-上架 2-下架</p>"
           }
         ]
       }

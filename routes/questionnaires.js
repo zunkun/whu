@@ -12,7 +12,7 @@ const config = require('../config');
 router.prefix('/api/questionnaires');
 
 /**
-* @api {get} /api/questionnaires?limit=&page=&title=&status=&userName=&mobile=startDate=endDate= 投票问卷列表
+* @api {get} /api/questionnaires?limit=&page=&title=&status=&userName=&mobile=startDate=endDate=&startTime=&endTime= 投票问卷列表
 * @apiName questionnaires-lists
 * @apiGroup 投票问卷管理
 * @apiDescription 投票问卷列表
@@ -20,11 +20,13 @@ router.prefix('/api/questionnaires');
 * @apiParam {Number} [limit] 分页条数，默认10
 * @apiParam {Number} [page] 第几页，默认1
 * @apiParam {String} [title] 活动标题
-* @apiParam {Number} [status] 状态 0-编辑中 1-进行中 2-已结束 3-已下架
+* @apiParam {Number} [onoff] 状态 0-上架下架 0-上架下架未设置 1-已上架 2-已下架
 * @apiParam {String} [userName] 发起人姓名
 * @apiParam {String} [mobile] 发起人手机号
-* @apiParam {String} [startDate] 开始日期,格式 2019-09-24
-* @apiParam {String} [endDate] 截止日期，格式 2019-09-30
+* @apiParam {String} [startDate] 开始日期,格式 2019-09-24,【已废弃】请使用 startTime
+* @apiParam {String} [endDate] 截止日期，格式 2019-09-30 【已废弃】请使用endTime
+* @apiParam {String} [startTime] 开始日期,格式 2019-09-24 08:00:00
+* @apiParam {String} [endTime] 截止日期，格式 2019-09-24 08:00:00
 * @apiSuccess {Number} errcode 成功为0
 * @apiSuccess {Object} data 投票问卷列表
 * @apiSuccess {Number} data.count 投票问卷总数
@@ -34,7 +36,7 @@ router.prefix('/api/questionnaires');
 * @apiSuccess {String} data.rows.description 描述
 * @apiSuccess {String} data.rows.startTime 开始时间
 * @apiSuccess {String} data.rows.endTime 结束时间
-* @apiSuccess {String} data.rows.status 状态 状态 1-进行中 2-已结束 3-已下架
+* @apiSuccess {String} data.rows.onoff 上架下架 0-上架下架未设置 1-已上架 2-已下架
 * @apiSuccess {String} data.rows.userId 发起人userId
 * @apiSuccess {String} data.rows.userName 发起人姓名
 * @apiSuccess {String} data.rows.mobile 发起人手机
@@ -55,24 +57,35 @@ router.get('/', async (ctx, next) => {
 	[ 'title', 'userName', 'mobile' ].map(key => {
 		if (query[key]) where[key] = { [Op.like]: `%${query[key]}%` };
 	});
-	if (query.status) where.status = Number(query.status);
+	if (query.onoff) where.onoff = Number(query.onoff);
 	if (query.startDate) {
 		let time = new Date(query.startDate);
 		time.setHours(0, 0, 0, 0);
-		if (!where.createdAt) where.createdAt = {};
-		where.createdAt[Op.gte] = time;
+		if (!where.startTime) where.startTime = {};
+		where.startTime[Op.gte] = time;
 	}
 	if (query.endDate) {
 		let time = new Date(query.endDate);
 		time.setHours(23, 59, 59, 59);
-		if (!where.createdAt) where.createdAt = {};
-		where.createdAt[Op.lte] = time;
+		if (!where.endTime) where.endTime = {};
+		where.endTime[Op.lte] = time;
+	}
+	if (query.startTime) {
+		let time = new Date(query.startTime);
+		if (!where.startTime) where.startTime = {};
+		where.startTime[Op.gte] = time;
+	}
+
+	if (query.endTime) {
+		let time = new Date(query.endTime);
+		if (!where.endTime) where.endTime = {};
+		where.endTime[Op.gte] = time;
 	}
 	const res = await Questionnaires.findAndCountAll({
 		where,
 		limit,
 		offset,
-		attributes: [ 'id', 'title', 'description', 'status', 'userId', 'userName', 'mobile', 'createdAt', 'startTime', 'endTime', 'depts' ],
+		attributes: [ 'id', 'title', 'description', 'userId', 'userName', 'mobile', 'createdAt', 'startTime', 'endTime', 'depts', 'onoff' ],
 		order: [ [ 'top', 'DESC' ], [ 'createdAt', 'DESC' ] ]
 	});
 	ctx.body = ResService.success(res);
@@ -80,13 +93,14 @@ router.get('/', async (ctx, next) => {
 });
 
 /**
-* @api {get} /api/questionnaires/ques?limit=&page= 我可以参与的投票问卷列表
+* @api {get} /api/questionnaires/ques?limit=&page=&status= 我可以参与的投票问卷列表
 * @apiName questionnaires-ques
 * @apiGroup 投票问卷管理
 * @apiDescription 查询我可以参与的投票问卷列表
 * @apiHeader {String} authorization 登录token
 * @apiParam {Number} [limit] 分页条数，默认10
 * @apiParam {Number} [page] 第几页，默认1
+* @apiParam {Number} [status] 状态，1-进行中 2-已结束,默认为1
 * @apiSuccess {Number} errcode 成功为0
 * @apiSuccess {Object} data 投票问卷列表
 * @apiSuccess {Number} data.count 投票问卷总数
@@ -96,7 +110,7 @@ router.get('/', async (ctx, next) => {
 * @apiSuccess {String} data.rows.description 描述
 * @apiSuccess {String} data.rows.startTime 开始时间
 * @apiSuccess {String} data.rows.endTime 结束时间
-* @apiSuccess {String} data.rows.status 状态 状态 1-进行中 2-已结束 3-已下架
+* @apiSuccess {String} data.rows.onoff 上架下架 0-上架下架未设置 1-已上架 2-已下架
 * @apiSuccess {String} data.rows.userId 发起人userId
 * @apiSuccess {String} data.rows.userName 发起人姓名
 * @apiSuccess {String} data.rows.mobile 发起人手机
@@ -114,7 +128,22 @@ router.get('/ques', async (ctx, next) => {
 	let page = Number(query.page) || 1;
 	let limit = Number(query.limit) || 10;
 	let offset = (page - 1) * limit;
+	let status = Number(query.status) || 1;
+	if (status !== 1 || status !== 2) {
+		ctx.body = ResService.fail('参数不正确');
+	}
 
+	let time = new Date();
+	const where = {};
+	// 进行中
+	if (status === 1) {
+		where.startTime = { [Op.lte]: time };
+		where.endTime = { [Op.gte]: time };
+	}
+	// 已结束
+	if (status === 2) {
+		where.endTime = { [Op.lt]: time };
+	}
 	let deptIds = [];
 	const deptStaffs = await DeptStaffs.findAll({ where: { userId: user.userId } });
 	for (let deptStaff of deptStaffs) {
@@ -123,12 +152,13 @@ router.get('/ques', async (ctx, next) => {
 	}
 
 	deptIds = Array.from(new Set(deptIds));
+	where.deptIds = { [Op.overlap]: deptIds };
 
 	const res = await Questionnaires.findAndCountAll({
-		where: { deptIds: { [Op.overlap]: deptIds } },
+		where,
 		limit,
 		offset,
-		attributes: [ 'id', 'top', 'title', 'description', 'status', 'userId', 'userName', 'mobile', 'createdAt', 'startTime', 'endTime', 'depts' ],
+		attributes: [ 'id', 'top', 'title', 'description', 'onoff', 'userId', 'userName', 'mobile', 'createdAt', 'startTime', 'endTime', 'depts' ],
 		order: [ [ 'top', 'DESC' ], [ 'createdAt', 'DESC' ] ]
 	});
 	ctx.body = ResService.success(res);
@@ -200,7 +230,7 @@ router.post('/', async (ctx, next) => {
 		anonymous: dataKeys.has('anonymous') ? !!data.anonymous : false,
 		realTimeVisiable: dataKeys.has('realTimeVisiable') ? !!data.realTimeVisiable : true,
 		selectionNum: Number(data.selectionNum) || 1,
-		status: 1,
+		onoff: 0,
 		timestamp
 	};
 	const deptIds = [];
@@ -264,7 +294,7 @@ router.post('/', async (ctx, next) => {
 * @apiSuccess {Object[]} [data.depts]  投票范围
 * @apiSuccess {String} data.depts.deptId  部门id
 * @apiSuccess {String} data.depts.deptName 部门名称
-* @apiSuccess {String} data.status 状态 状态 1-进行中 2-已结束 3-已下架
+* @apiSuccess {String} data.onoff 上架下架 0-上架下架未设置 1-已上架 2-已下架
 * @apiSuccess {Object[]} data.options  选项列表
 * @apiSuccess {Number} data.options.id  选项数据ID
 * @apiSuccess {Number} data.options.questionnaireId  问卷主数据ID
@@ -324,7 +354,6 @@ router.delete('/:id', async (ctx, next) => {
 * @apiParam {Object[]} [depts]  投票范围
 * @apiParam {String} depts.deptId  部门id
 * @apiParam {String} depts.deptName 部门名称
-* @apiParam {String} [status] 状态 1-进行中 2-已结束 3-已下架
 * @apiParam {Object[]} [options]  选项列表
 * @apiParam {Number} options.[id]  选项数据ID,传递ID做更新操作，不传值则为创建新选项操作
 * @apiParam {Number} options.sequence  选项排序
@@ -354,15 +383,10 @@ router.put('/:id', async (ctx, next) => {
 	});
 
 	if (data.startTime) {
-		let time = new Date(data.startTime);
-		time.setHours(0, 0, 0, 0);
-		queData.startTime = time;
+		queData.startTime = new Date(data.startTime);
 	}
-
 	if (data.endTime) {
-		let time = new Date(data.endTime);
-		time.setHours(23, 59, 59, 59);
-		queData.endTime = time;
+		queData.endTime = new Date(data.endTime);
 	}
 
 	if (dataKeys.has('commentAllowed')) queData.commentAllowed = !!data.commentAllowed;
@@ -371,15 +395,20 @@ router.put('/:id', async (ctx, next) => {
 	if (dataKeys.has('realTimeVisiable')) queData.realTimeVisiable = !!data.realTimeVisiable;
 
 	const depts = [];
+	const deptIds = [];
 
 	if (data.deptIds && data.deptIds.length) {
 		for (let deptId of data.deptIds) {
 			const dept = await DeptService.getDeptInfo(deptId);
 			depts.push({ deptId, deptName: dept.deptName });
+			deptIds.push(deptId);
 		}
 	}
 	// 更新主数据
-	if (dataKeys.has('deptIds')) queData.depts = depts;
+	if (dataKeys.has('deptIds')) {
+		queData.depts = depts;
+		queData.deptIds = deptIds;
+	}
 	await Questionnaires.update(queData, { where: { id: ctx.params.id } });
 
 	// 更新选项数据
@@ -403,13 +432,14 @@ router.put('/:id', async (ctx, next) => {
 });
 
 /**
-* @api {post} /api/questionnaires/status 设置当前状态
+* @api {post} /api/questionnaires/status 【废弃】设置当前状态
 * @apiName questionnaires-status
+* @apiDeprecated 请查看(#投票问卷管理:questionnaires-onoff).
 * @apiGroup 投票问卷管理
-* @apiDescription 设置当前状态 当前投票问卷数据状态 1-启用 2-停用中
+* @apiDescription 设置当前状态 当前投票问卷数据状态 1-上架 2-下架，新的为 onoff
 * @apiHeader {String} authorization 登录token
 * @apiParam {Number[]} questionnaireIds 投票问卷id表，例如 [1,2,3]
-* @apiParam {Number} status 1-进行中 2-已结束 3-已下架
+* @apiParam {Number} status 1-上架 2-下架
 * @apiSuccess {Number} errcode 成功为0
 * @apiSuccess {Object} data {}
 * @apiError {Number} errcode 失败不为0
@@ -419,6 +449,33 @@ router.post('/status', async (ctx, next) => {
 	const { questionnaireIds, status } = ctx.request.body;
 
 	return Questionnaires.update({ status: Number(status) }, { where: { id: { [Op.in]: questionnaireIds } } })
+		.then(() => {
+			ctx.body = ResService.success({});
+			next();
+		}).catch(error => {
+			console.error('设置投票问卷当前状态失败', error);
+			ctx.body = ResService.fail('设置失败');
+			next();
+		});
+});
+
+/**
+* @api {post} /api/questionnaires/onoff 上架下架
+* @apiName questionnaires-onoff
+* @apiGroup 投票问卷管理
+* @apiDescription 上架下架
+* @apiHeader {String} authorization 登录token
+* @apiParam {Number[]} questionnaireIds 投票问卷id表，例如 [1,2,3]
+* @apiParam {Number} onoff 1-上架 2-下架
+* @apiSuccess {Number} errcode 成功为0
+* @apiSuccess {Object} data {}
+* @apiError {Number} errcode 失败不为0
+* @apiError {Number} errmsg 错误消息
+*/
+router.post('/onoff', async (ctx, next) => {
+	const { questionnaireIds, onoff } = ctx.request.body;
+
+	return Questionnaires.update({ onoff: Number(onoff) }, { where: { id: { [Op.in]: questionnaireIds } } })
 		.then(() => {
 			ctx.body = ResService.success({});
 			next();

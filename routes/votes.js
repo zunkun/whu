@@ -29,7 +29,6 @@ router.prefix('/api/votes');
 router.post('/', async (ctx, next) => {
 	let user = jwt.decode(ctx.header.authorization.substr(7));
 	const data = ctx.request.body;
-	console.log({ data });
 	if (!data.questionnaireId || !Array.isArray(data.checkedIds) || !data.checkedIds.length) {
 		ctx.body = ResService.fail('参数不正确');
 		return;
@@ -298,7 +297,7 @@ router.get('/commentsOut', async (ctx, next) => {
 * @apiSuccess {String} data.rows.description 描述
 * @apiSuccess {String} data.rows.startTime 开始时间
 * @apiSuccess {String} data.rows.endTime 结束时间
-* @apiSuccess {String} data.rows.status 状态 状态 1-进行中 2-已结束 3-已下架
+* @apiSuccess {String} data.rows.onoff 上架下架 0-上架下架未设置 1-已上架 2-已下架
 * @apiSuccess {String} data.rows.userId 发起人userId
 * @apiSuccess {String} data.rows.userName 发起人姓名
 * @apiSuccess {String} data.rows.mobile 发起人手机
@@ -329,7 +328,7 @@ router.get('/participate', async (ctx, next) => {
 		where: { id: { [Op.in]: questionnaireIds } },
 		limit,
 		offset,
-		attributes: [ 'id', 'title', 'description', 'status', 'userId', 'userName', 'mobile', 'createdAt', 'startTime', 'endTime', 'depts', 'top' ],
+		attributes: [ 'id', 'title', 'description', 'onoff', 'userId', 'userName', 'mobile', 'createdAt', 'startTime', 'endTime', 'depts', 'top' ],
 		order: [ [ 'createdAt', 'DESC' ] ]
 	});
 	ctx.body = ResService.success(res);
