@@ -1288,6 +1288,83 @@
     "groupTitle": "投票问卷管理"
   },
   {
+    "type": "delete",
+    "url": "/api/questionnaires/:id",
+    "title": "删除投票问卷",
+    "name": "questionnaires_del",
+    "group": "投票问卷管理",
+    "description": "<p>删除投票问卷</p>",
+    "header": {
+      "fields": {
+        "Header": [
+          {
+            "group": "Header",
+            "type": "String",
+            "optional": false,
+            "field": "authorization",
+            "description": "<p>登录token</p>"
+          }
+        ]
+      }
+    },
+    "parameter": {
+      "fields": {
+        "Parameter": [
+          {
+            "group": "Parameter",
+            "type": "Number",
+            "optional": false,
+            "field": "id",
+            "description": "<p>投票问卷id</p>"
+          }
+        ]
+      }
+    },
+    "success": {
+      "fields": {
+        "Success 200": [
+          {
+            "group": "Success 200",
+            "type": "Number",
+            "optional": false,
+            "field": "errcode",
+            "description": "<p>成功为0</p>"
+          },
+          {
+            "group": "Success 200",
+            "type": "Object",
+            "optional": false,
+            "field": "data",
+            "description": "<p>{}</p>"
+          }
+        ]
+      }
+    },
+    "error": {
+      "fields": {
+        "Error 4xx": [
+          {
+            "group": "Error 4xx",
+            "type": "Number",
+            "optional": false,
+            "field": "errcode",
+            "description": "<p>失败不为0</p>"
+          },
+          {
+            "group": "Error 4xx",
+            "type": "Number",
+            "optional": false,
+            "field": "errmsg",
+            "description": "<p>错误消息</p>"
+          }
+        ]
+      }
+    },
+    "version": "0.0.0",
+    "filename": "routes/questionnaires.js",
+    "groupTitle": "投票问卷管理"
+  },
+  {
     "type": "get",
     "url": "/api/questionnaires/:id",
     "title": "投票问卷信息",
@@ -1343,6 +1420,13 @@
             "optional": false,
             "field": "data.id",
             "description": "<p>投票问卷活动ID</p>"
+          },
+          {
+            "group": "Success 200",
+            "type": "Boolean",
+            "optional": false,
+            "field": "data.top",
+            "description": "<p>是否置顶， true置顶 false不置顶</p>"
           },
           {
             "group": "Success 200",
@@ -1569,7 +1653,7 @@
   },
   {
     "type": "get",
-    "url": "/api/questionnaires?limit=&page=&title=&status=&userName=&mobile=startTime=endTime=",
+    "url": "/api/questionnaires?limit=&page=&title=&status=&userName=&mobile=startDate=endDate=",
     "title": "投票问卷列表",
     "name": "questionnaires_lists",
     "group": "投票问卷管理",
@@ -1686,6 +1770,202 @@
             "optional": false,
             "field": "data.rows.title",
             "description": "<p>投票问卷活动标题</p>"
+          },
+          {
+            "group": "Success 200",
+            "type": "Boolean",
+            "optional": false,
+            "field": "data.rows.top",
+            "description": "<p>是否置顶， true置顶 false不置顶</p>"
+          },
+          {
+            "group": "Success 200",
+            "type": "String",
+            "optional": false,
+            "field": "data.rows.description",
+            "description": "<p>描述</p>"
+          },
+          {
+            "group": "Success 200",
+            "type": "String",
+            "optional": false,
+            "field": "data.rows.startTime",
+            "description": "<p>开始时间</p>"
+          },
+          {
+            "group": "Success 200",
+            "type": "String",
+            "optional": false,
+            "field": "data.rows.endTime",
+            "description": "<p>结束时间</p>"
+          },
+          {
+            "group": "Success 200",
+            "type": "String",
+            "optional": false,
+            "field": "data.rows.status",
+            "description": "<p>状态 状态 1-进行中 2-已结束 3-已下架</p>"
+          },
+          {
+            "group": "Success 200",
+            "type": "String",
+            "optional": false,
+            "field": "data.rows.userId",
+            "description": "<p>发起人userId</p>"
+          },
+          {
+            "group": "Success 200",
+            "type": "String",
+            "optional": false,
+            "field": "data.rows.userName",
+            "description": "<p>发起人姓名</p>"
+          },
+          {
+            "group": "Success 200",
+            "type": "String",
+            "optional": false,
+            "field": "data.rows.mobile",
+            "description": "<p>发起人手机</p>"
+          },
+          {
+            "group": "Success 200",
+            "type": "String",
+            "optional": false,
+            "field": "data.rows.createdAt",
+            "description": "<p>创建时间</p>"
+          },
+          {
+            "group": "Success 200",
+            "type": "Object[]",
+            "optional": false,
+            "field": "data.rows.depts",
+            "description": "<p>投票范围</p>"
+          },
+          {
+            "group": "Success 200",
+            "type": "String",
+            "optional": false,
+            "field": "data.rows.depts.deptId",
+            "description": "<p>部门id</p>"
+          },
+          {
+            "group": "Success 200",
+            "type": "String",
+            "optional": false,
+            "field": "data.rows.depts.deptName",
+            "description": "<p>部门名称</p>"
+          }
+        ]
+      }
+    },
+    "error": {
+      "fields": {
+        "Error 4xx": [
+          {
+            "group": "Error 4xx",
+            "type": "Number",
+            "optional": false,
+            "field": "errcode",
+            "description": "<p>失败不为0</p>"
+          },
+          {
+            "group": "Error 4xx",
+            "type": "Number",
+            "optional": false,
+            "field": "errmsg",
+            "description": "<p>错误消息</p>"
+          }
+        ]
+      }
+    },
+    "version": "0.0.0",
+    "filename": "routes/questionnaires.js",
+    "groupTitle": "投票问卷管理"
+  },
+  {
+    "type": "get",
+    "url": "/api/questionnaires?limit=&page=",
+    "title": "我可以参与的投票问卷列表",
+    "name": "questionnaires_lists",
+    "group": "投票问卷管理",
+    "description": "<p>查询我可以参与的投票问卷列表</p>",
+    "header": {
+      "fields": {
+        "Header": [
+          {
+            "group": "Header",
+            "type": "String",
+            "optional": false,
+            "field": "authorization",
+            "description": "<p>登录token</p>"
+          }
+        ]
+      }
+    },
+    "parameter": {
+      "fields": {
+        "Parameter": [
+          {
+            "group": "Parameter",
+            "type": "Number",
+            "optional": true,
+            "field": "limit",
+            "description": "<p>分页条数，默认10</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "Number",
+            "optional": true,
+            "field": "page",
+            "description": "<p>第几页，默认1</p>"
+          }
+        ]
+      }
+    },
+    "success": {
+      "fields": {
+        "Success 200": [
+          {
+            "group": "Success 200",
+            "type": "Number",
+            "optional": false,
+            "field": "errcode",
+            "description": "<p>成功为0</p>"
+          },
+          {
+            "group": "Success 200",
+            "type": "Object",
+            "optional": false,
+            "field": "data",
+            "description": "<p>投票问卷列表</p>"
+          },
+          {
+            "group": "Success 200",
+            "type": "Number",
+            "optional": false,
+            "field": "data.count",
+            "description": "<p>投票问卷总数</p>"
+          },
+          {
+            "group": "Success 200",
+            "type": "Object[]",
+            "optional": false,
+            "field": "data.rows",
+            "description": "<p>当前页投票问卷列表</p>"
+          },
+          {
+            "group": "Success 200",
+            "type": "String",
+            "optional": false,
+            "field": "data.rows.title",
+            "description": "<p>投票问卷活动标题</p>"
+          },
+          {
+            "group": "Success 200",
+            "type": "Boolean",
+            "optional": false,
+            "field": "data.rows.top",
+            "description": "<p>是否置顶， true置顶 false不置顶</p>"
           },
           {
             "group": "Success 200",
