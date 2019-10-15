@@ -80,8 +80,8 @@ router.get('/', async (ctx, next) => {
 });
 
 /**
-* @api {get} /api/questionnaires?limit=&page= 我可以参与的投票问卷列表
-* @apiName questionnaires-lists
+* @api {get} /api/questionnaires/ques?limit=&page= 我可以参与的投票问卷列表
+* @apiName questionnaires-ques
 * @apiGroup 投票问卷管理
 * @apiDescription 查询我可以参与的投票问卷列表
 * @apiHeader {String} authorization 登录token
