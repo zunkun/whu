@@ -47,7 +47,7 @@ router.post('/', async (ctx, next) => {
 		questionnaireId: data.questionnaireId,
 		userId: user.userId,
 		userName: user.userName,
-		phone: user.phone,
+		mobile: user.mobile,
 		avatar: user.avatar,
 		voteTime
 	};
@@ -101,7 +101,7 @@ router.post('/', async (ctx, next) => {
 * @apiSuccess {Number} data.questionnaireId 投票活动ID
 * @apiSuccess {String} data.userId 投票人userId
 * @apiSuccess {String} data.userName 投票人姓名
-* @apiSuccess {String} data.phone 投票人员手机
+* @apiSuccess {String} data.mobile 投票人员手机
 * @apiSuccess {String} data.avatar 投票人头像
 * @apiSuccess {Date} data.voteTime 投票时间
 * @apiSuccess {Number[]} data.checkedIds 投票选择的选项ID
@@ -143,7 +143,7 @@ router.get('/info', async (ctx, next) => {
 * @apiSuccess {Number} data.rows.questionnaireId 投票活动ID
 * @apiSuccess {String} data.rows.userId 投票人userId
 * @apiSuccess {String} data.rows.userName 投票人姓名
-* @apiSuccess {String} data.rows.phone 投票人员手机
+* @apiSuccess {String} data.rows.mobile 投票人员手机
 * @apiSuccess {String} data.rows.avatar 投票人头像
 * @apiSuccess {Date} data.rows.voteTime 投票时间
 * @apiSuccess {Number[]} data.rows.checkedIds 投票选择的选项ID
@@ -207,7 +207,7 @@ router.get('/comments', async (ctx, next) => {
 * @apiSuccess {Number} data.options.votes.questionnaireId 投票活动ID
 * @apiSuccess {String} data.options.votes.userId 投票人userId
 * @apiSuccess {String} data.options.votes.userName 投票人姓名
-* @apiSuccess {String} data.options.votes.phone 投票人员手机
+* @apiSuccess {String} data.options.votes.mobile 投票人员手机
 * @apiSuccess {String} data.options.votes.avatar 投票人头像
 * @apiSuccess {Date} data.options.votes.voteTime 投票时间
 * @apiSuccess {Number[]} data.options.votes.checkedIds 投票选择的选项ID
@@ -301,7 +301,7 @@ router.get('/commentsOut', async (ctx, next) => {
 * @apiSuccess {String} data.rows.status 状态 状态 1-进行中 2-已结束 3-已下架
 * @apiSuccess {String} data.rows.userId 发起人userId
 * @apiSuccess {String} data.rows.userName 发起人姓名
-* @apiSuccess {String} data.rows.phone 发起人手机
+* @apiSuccess {String} data.rows.mobile 发起人手机
 * @apiSuccess {String} data.rows.createdAt  创建时间
 * @apiSuccess {Object[]} data.rows.depts  投票范围
 * @apiSuccess {String} data.rows.depts.deptId  部门id
@@ -329,10 +329,11 @@ router.get('/participate', async (ctx, next) => {
 		where: { id: { [Op.in]: questionnaireIds } },
 		limit,
 		offset,
-		attributes: [ 'id', 'title', 'description', 'status', 'userId', 'userName', 'phone', 'createdAt', 'startTime', 'endTime', 'depts' ],
+		attributes: [ 'id', 'title', 'description', 'status', 'userId', 'userName', 'mobile', 'createdAt', 'startTime', 'endTime', 'depts', 'top' ],
 		order: [ [ 'createdAt', 'DESC' ] ]
 	});
 	ctx.body = ResService.success(res);
 	await next();
 });
+
 module.exports = router;

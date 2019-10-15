@@ -1,4 +1,4 @@
-const mysql = require('../core/db/mysql');
+const postgres = require('../core/db/postgres');
 const { DataTypes, Model } = require('sequelize');
 const Questionnaries = require('./Questionnaires');
 
@@ -21,7 +21,7 @@ Votes.init({
 		type: DataTypes.STRING,
 		comment: '投票人姓名'
 	},
-	phone: {
+	mobile: {
 		type: DataTypes.STRING,
 		comment: '投票人手机号码'
 	},
@@ -47,7 +47,7 @@ Votes.init({
 		comment: '评论状态 0-已提交 1-通过 2-未通过 3-已删除'
 	}
 }, {
-	sequelize: mysql,
+	sequelize: postgres,
 	modelName: 'votes',
 	comment: '问卷选项信息',
 	paranoid: true

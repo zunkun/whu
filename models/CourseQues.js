@@ -1,4 +1,4 @@
-const mysql = require('../core/db/mysql');
+const postgres = require('../core/db/postgres');
 const { DataTypes, Model } = require('sequelize');
 const CourseMain = require('./CourseMain');
 
@@ -18,7 +18,7 @@ CourseQues.init({
 		defaultValue: 1,
 		comment: '提问状态 1-显示 2-隐藏'
 	}
-}, { sequelize: mysql, modelName: 'courseques', timestamps: false, paranoid: true, comment: '课程提问' });
+}, { sequelize: postgres, modelName: 'courseques', timestamps: false, paranoid: true, comment: '课程提问' });
 
 CourseQues.belongsTo(CourseMain);
 

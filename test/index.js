@@ -17,16 +17,17 @@ const user = {
 	email: '',
 	role: 3
 };
-process.token = 'Bearer ' + jwt.sign({ userId: user.userId, userName: user.userName, jobnumber: user.jobnumber }, config.secret);
+process.token = 'Bearer ' + jwt.sign({ userId: user.userId, userName: user.userName, jobnumber: user.jobnumber, mobile: user.mobile }, config.secret);
+console.log(process.token);
 process.user = user;
 console.log(process.token, process.user);
 
 console.log('-------------API 测试-------------');
 
-// describe('测试 /api/questionnaires', () => {
-// 	require('./api/questionnaires');
-// });
-
-describe('测试 /api/votes', () => {
-	require('./api/votes');
+describe('测试 /api/questionnaires', () => {
+	require('./api/questionnaires');
 });
+
+// describe('测试 /api/votes', () => {
+// 	require('./api/votes');
+// });

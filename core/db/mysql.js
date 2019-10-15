@@ -1,7 +1,6 @@
 const Sequelize = require('sequelize');
 const config = require('../../config');
 const pgConfig = config.mysql;
-console.log(pgConfig);
 const mysql = new Sequelize(pgConfig.database, pgConfig.username, pgConfig.password, {
 	host: pgConfig.host,
 	port: pgConfig.port,

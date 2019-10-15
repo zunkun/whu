@@ -1,4 +1,4 @@
-const mysql = require('../core/db/mysql');
+const postgres = require('../core/db/postgres');
 const { DataTypes, Model } = require('sequelize');
 const Questionnaries = require('./Questionnaires');
 
@@ -36,7 +36,7 @@ QueOptions.init({
 		comment: '数据流水'
 	}
 }, {
-	sequelize: mysql,
+	sequelize: postgres,
 	modelName: 'queoptions',
 	comment: '问卷选项信息',
 	paranoid: true

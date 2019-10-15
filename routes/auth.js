@@ -86,7 +86,7 @@ router.get('/login', async (ctx, next) => {
 	if (!userId || userId === 'undefined') {
 		userId = '4508346521365159';
 		const user = await DingStaffs.findOne({ where: { userId } });
-		const token = jwt.sign({ userId: user.userId, userName: user.userName, jobnumber: user.jobnumber }, config.secret);
+		const token = jwt.sign({ userId: user.userId, userName: user.userName, jobnumber: user.jobnumber, mobile: user.mobile }, config.secret);
 		ctx.body = ResService.success({ user, token: 'Bearer ' + token });
 		return;
 	}
@@ -103,7 +103,7 @@ router.get('/login', async (ctx, next) => {
 			if (userRes.errcode !== 0) {
 				ctx.body = ResService.fail(user.errmsg, user.errcode);
 			}
-			user = { userId: user.userid, userName: user.name, jobnumber: user.jobnumber };
+			user = { userId: user.userid, userName: user.name, jobnumber: user.jobnumber, mobile: user.mobile };
 		}
 
 		if (!user) {

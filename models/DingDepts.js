@@ -1,4 +1,4 @@
-const mysql = require('../core/db/mysql');
+const postgres = require('../core/db/postgres');
 const { DataTypes, Model } = require('sequelize');
 
 // 钉钉组织架构
@@ -12,8 +12,16 @@ DingDepts.init({
 	deptName: {
 		type: DataTypes.STRING,
 		comment: '部门名称'
-	} // 部门名称
-}, { sequelize: mysql, modelName: 'dingdepts', timestamps: false, comment: '钉钉组织架构' });
+	}, // 部门名称
+	parentId: {
+		type: DataTypes.INTEGER,
+		comment: '父部门deptId'
+	},
+	deptPaths: {
+		type: DataTypes.ARRAY(DataTypes.INTEGER),
+		comment: '部门路径表'
+	}
+}, { sequelize: postgres, modelName: 'dingdepts', timestamps: false, comment: '钉钉组织架构' });
 
 DingDepts.sync();
 

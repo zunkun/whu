@@ -1,4 +1,4 @@
-const mysql = require('../core/db/mysql');
+const postgres = require('../core/db/postgres');
 const { DataTypes, Model } = require('sequelize');
 
 // 课程类型
@@ -13,7 +13,7 @@ CourseTypes.init({
 		defaultValue: 1,
 		comment: '类型状态 1-使用中  2-删除'
 	}
-}, { sequelize: mysql, modelName: 'coursetypes', timestamps: false, paranoid: true, comment: '课程类型' });
+}, { sequelize: postgres, modelName: 'coursetypes', timestamps: false, paranoid: true, comment: '课程类型' });
 
 CourseTypes.sync();
 

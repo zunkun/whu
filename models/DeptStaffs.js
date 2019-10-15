@@ -1,7 +1,5 @@
-const mysql = require('../core/db/mysql');
+const postgres = require('../core/db/postgres');
 const { DataTypes, Model } = require('sequelize');
-const DingDepts = require('./DingDepts');
-const DingStaffs = require('./DingStaffs');
 
 // 钉钉组织架构与人员对应关系
 class DeptStaffs extends Model {}
@@ -18,10 +16,7 @@ DeptStaffs.init({
 	},
 	userName: { type: DataTypes.STRING, comment: '员工姓名' },
 	deptName: { type: DataTypes.STRING, comment: '部门名称' }
-}, { sequelize: mysql, modelName: 'deptstaffs', timestamps: false, comment: '钉钉组织架构与人员对应关系' });
-
-DeptStaffs.belongsTo(DingDepts, { foreignKey: 'dingdeptId' });
-DeptStaffs.belongsTo(DingStaffs, { foreignKey: 'dingstaffId' });
+}, { sequelize: postgres, modelName: 'deptstaffs', timestamps: false, comment: '钉钉组织架构与人员对应关系' });
 
 DeptStaffs.sync();
 

@@ -1,4 +1,4 @@
-const mysql = require('../core/db/mysql');
+const postgres = require('../core/db/postgres');
 const { DataTypes, Model } = require('sequelize');
 const CourseMain = require('./CourseMain');
 
@@ -14,7 +14,7 @@ Courses.init({
 		comment: '课程名称'
 	},
 	timestamp: { type: DataTypes.BIGINT, comment: '标识数据版本流水' }
-}, { sequelize: mysql, modelName: 'courses', timestamps: false, paranoid: true, comment: '课程表' });
+}, { sequelize: postgres, modelName: 'courses', timestamps: false, paranoid: true, comment: '课程表' });
 
 Courses.belongsTo(CourseMain);
 

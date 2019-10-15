@@ -15,6 +15,7 @@ class StructureSchedule {
 		this.deptMap = new Map();
 		this.departments = [];
 		this.dingdeptIdMap = new Map();
+		this.pathMap = new Map();
 	}
 
 	async start () {
@@ -31,7 +32,6 @@ class StructureSchedule {
 		if (sync) {
 			console.log('当日已经同步部门人员信息，不再同步');
 		}
-
 		try {
 			await this.syncDepts();
 			await this.syncStaffs();
@@ -45,6 +45,8 @@ class StructureSchedule {
 
 	async syncDepts () {
 		console.log('【开始】获取部门列表');
+		this.pathMap = new Map();
+
 		this.departments = await dingding.getDeptLists({ fetch_child: true });
 
 		if (!this.departments.length) {
@@ -63,12 +65,18 @@ class StructureSchedule {
 			});
 		}
 
+		for (let department of this.departments) {
+			let paths = this.getPaths(department.id, []);
+			this.pathMap.set(department.id, paths);
+		}
+
 		console.log('【开始】保存部门列表');
 		for (let department of this.departments) {
 			await DingDepts.upsert({
 				deptId: department.id,
 				deptName: department.name,
-				parentId: department.parentid
+				parentId: department.parentid,
+				deptPaths: this.pathMap.get(department.id) || []
 			}, {
 				where: {
 					deptId: department.id
@@ -78,6 +86,19 @@ class StructureSchedule {
 		}
 		console.log('【成功】保存部门列表');
 		return Promise.resolve();
+	}
+
+	getPaths (deptId, paths = []) {
+		paths.push(deptId);
+		if (deptId === 1) {
+			return paths;
+		}
+		let parentId = this.deptMap.get(deptId).parentId;
+		if (this.pathMap.has(parentId)) {
+			paths = paths.concat(this.pathMap.get(parentId));
+			return paths;
+		}
+		return this.getPaths(parentId, paths);
 	}
 
 	async syncStaffs () {
@@ -102,13 +123,10 @@ class StructureSchedule {
 				let staffData = {
 					userId: user.userid,
 					userName: user.name,
+					jobnumber: user.jobnumber,
 					mobile: user.mobile,
-					isAdmin: user.isAdmin,
-					isBoss: user.isBoss,
-					position: user.position,
-					email: user.email,
 					avatar: user.avatar,
-					jobnumber: user.jobnumber
+					email: user.email
 				};
 
 				await DingStaffs.upsert(staffData, { where: { userId: user.userid }, returning: true });

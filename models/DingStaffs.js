@@ -1,4 +1,4 @@
-const mysql = require('../core/db/mysql');
+const postgres = require('../core/db/postgres');
 const { DataTypes, Model } = require('sequelize');
 
 class DingStaffs extends Model {}
@@ -25,7 +25,7 @@ DingStaffs.init({
 		type: DataTypes.STRING,
 		comment: '手机'
 	}
-}, { sequelize: mysql, modelName: 'dingstaffs', timestamps: false, comment: '钉钉用户' });
+}, { sequelize: postgres, modelName: 'dingstaffs', timestamps: false, comment: '钉钉用户' });
 
 DingStaffs.sync();
 

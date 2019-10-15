@@ -63,11 +63,15 @@ router.post('/store', async (ctx, next) => {
 * @apiError {Number} errmsg 错误消息
 */
 
-router.post('/store', async (ctx, next) => {
+router.get('/userstore', async (ctx, next) => {
+	let query = ctx.query;
+	let page = Number(query.page) || 1;
+	let limit = Number(query.limit) || 10;
+	let offset = (page - 1) * limit;
 	let user = jwt.decode(ctx.header.authorization.substr(7));
 	const { coursemainId } = ctx.request.body;
 
-	let coursemain = await Stores.findOne({ where: { userId: user.userId, coursemainId }, paranoid: false });
+	let coursemain = await Stores.findOne({ where: { userId: user.userId }, offset, limit });
 	if (coursemain) {
 		ctx.body = ResService.fail('您已收藏过该课程');
 		return;

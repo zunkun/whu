@@ -4,13 +4,15 @@ const Router = require('koa-router');
 const router = new Router();
 const Questionnaires = require('../models/Questionnaires');
 const QueOptions = require('../models/QueOptions');
+const DingDepts = require('../models/DingDepts');
+const DeptStaffs = require('../models/DeptStaffs');
 const jwt = require('jsonwebtoken');
 const DeptService = require('../services/DeptService');
-
+const config = require('../config');
 router.prefix('/api/questionnaires');
 
 /**
-* @api {get} /api/questionnaires?limit=&page=&title=&status=&userName=&phone=startTime=endTime= 投票问卷列表
+* @api {get} /api/questionnaires?limit=&page=&title=&status=&userName=&mobile=startDate=endDate= 投票问卷列表
 * @apiName questionnaires-lists
 * @apiGroup 投票问卷管理
 * @apiDescription 投票问卷列表
@@ -20,7 +22,7 @@ router.prefix('/api/questionnaires');
 * @apiParam {String} [title] 活动标题
 * @apiParam {Number} [status] 状态 0-编辑中 1-进行中 2-已结束 3-已下架
 * @apiParam {String} [userName] 发起人姓名
-* @apiParam {String} [phone] 发起人手机号
+* @apiParam {String} [mobile] 发起人手机号
 * @apiParam {String} [startDate] 开始日期,格式 2019-09-24
 * @apiParam {String} [endDate] 截止日期，格式 2019-09-30
 * @apiSuccess {Number} errcode 成功为0
@@ -28,13 +30,14 @@ router.prefix('/api/questionnaires');
 * @apiSuccess {Number} data.count 投票问卷总数
 * @apiSuccess {Object[]} data.rows 当前页投票问卷列表
 * @apiSuccess {String} data.rows.title 投票问卷活动标题
+* @apiSuccess {Boolean} data.rows.top 是否置顶， true置顶 false不置顶
 * @apiSuccess {String} data.rows.description 描述
 * @apiSuccess {String} data.rows.startTime 开始时间
 * @apiSuccess {String} data.rows.endTime 结束时间
 * @apiSuccess {String} data.rows.status 状态 状态 1-进行中 2-已结束 3-已下架
 * @apiSuccess {String} data.rows.userId 发起人userId
 * @apiSuccess {String} data.rows.userName 发起人姓名
-* @apiSuccess {String} data.rows.phone 发起人手机
+* @apiSuccess {String} data.rows.mobile 发起人手机
 * @apiSuccess {String} data.rows.createdAt  创建时间
 * @apiSuccess {Object[]} data.rows.depts  投票范围
 * @apiSuccess {String} data.rows.depts.deptId  部门id
@@ -49,29 +52,86 @@ router.get('/', async (ctx, next) => {
 	let offset = (page - 1) * limit;
 	let where = {};
 
-	[ 'title', 'userName', 'phone' ].map(key => {
+	[ 'title', 'userName', 'mobile' ].map(key => {
 		if (query[key]) where[key] = { [Op.like]: `%${query[key]}%` };
 	});
 	if (query.status) where.status = Number(query.status);
 	if (query.startDate) {
 		let time = new Date(query.startDate);
 		time.setHours(0, 0, 0, 0);
-		where.createdTime = { [Op.gte]: time };
+		if (!where.createdAt) where.createdAt = {};
+		where.createdAt[Op.gte] = time;
 	}
 	if (query.endDate) {
 		let time = new Date(query.endDate);
 		time.setHours(23, 59, 59, 59);
-		where.createdTime = { [Op.lte]: time };
+		if (!where.createdAt) where.createdAt = {};
+		where.createdAt[Op.lte] = time;
 	}
 	const res = await Questionnaires.findAndCountAll({
 		where,
 		limit,
 		offset,
-		attributes: [ 'id', 'title', 'description', 'status', 'userId', 'userName', 'phone', 'createdAt', 'startTime', 'endTime', 'depts' ],
+		attributes: [ 'id', 'title', 'description', 'status', 'userId', 'userName', 'mobile', 'createdAt', 'startTime', 'endTime', 'depts' ],
 		order: [ [ 'top', 'DESC' ], [ 'createdAt', 'DESC' ] ]
 	});
 	ctx.body = ResService.success(res);
 	await next();
+});
+
+/**
+* @api {get} /api/questionnaires?limit=&page= 我可以参与的投票问卷列表
+* @apiName questionnaires-lists
+* @apiGroup 投票问卷管理
+* @apiDescription 查询我可以参与的投票问卷列表
+* @apiHeader {String} authorization 登录token
+* @apiParam {Number} [limit] 分页条数，默认10
+* @apiParam {Number} [page] 第几页，默认1
+* @apiSuccess {Number} errcode 成功为0
+* @apiSuccess {Object} data 投票问卷列表
+* @apiSuccess {Number} data.count 投票问卷总数
+* @apiSuccess {Object[]} data.rows 当前页投票问卷列表
+* @apiSuccess {String} data.rows.title 投票问卷活动标题
+* @apiSuccess {Boolean} data.rows.top 是否置顶， true置顶 false不置顶
+* @apiSuccess {String} data.rows.description 描述
+* @apiSuccess {String} data.rows.startTime 开始时间
+* @apiSuccess {String} data.rows.endTime 结束时间
+* @apiSuccess {String} data.rows.status 状态 状态 1-进行中 2-已结束 3-已下架
+* @apiSuccess {String} data.rows.userId 发起人userId
+* @apiSuccess {String} data.rows.userName 发起人姓名
+* @apiSuccess {String} data.rows.mobile 发起人手机
+* @apiSuccess {String} data.rows.createdAt  创建时间
+* @apiSuccess {Object[]} data.rows.depts  投票范围
+* @apiSuccess {String} data.rows.depts.deptId  部门id
+* @apiSuccess {String} data.rows.depts.deptName 部门名称
+* @apiError {Number} errcode 失败不为0
+* @apiError {Number} errmsg 错误消息
+*/
+
+router.get('/ques', async (ctx, next) => {
+	let user = jwt.decode(ctx.header.authorization.substr(7));
+	let query = ctx.query;
+	let page = Number(query.page) || 1;
+	let limit = Number(query.limit) || 10;
+	let offset = (page - 1) * limit;
+
+	let deptIds = [];
+	const deptStaffs = await DeptStaffs.findAll({ where: { userId: user.userId } });
+	for (let deptStaff of deptStaffs) {
+		let dept = await DingDepts.findOne({ where: { deptId: deptStaff.deptId } });
+		deptIds = deptIds.concat(dept.deptPaths.split('|'));
+	}
+
+	deptIds = Array.from(new Set(deptIds));
+
+	const res = await Questionnaires.findAndCountAll({
+		where: { deptIds: { [Op.overlap]: deptIds } },
+		limit,
+		offset,
+		attributes: [ 'id', 'top', 'title', 'description', 'status', 'userId', 'userName', 'mobile', 'createdAt', 'startTime', 'endTime', 'depts' ],
+		order: [ [ 'top', 'DESC' ], [ 'createdAt', 'DESC' ] ]
+	});
+	ctx.body = ResService.success(res);
 });
 
 /**
@@ -134,7 +194,7 @@ router.post('/', async (ctx, next) => {
 		video: data.video,
 		userId: user.userId,
 		userName: user.userName,
-		phone: user.mobile || user.phone,
+		mobile: user.mobile,
 		commentAllowed: dataKeys.has('commentAllowed') ? !!data.commentAllowed : true,
 		commentVisible: dataKeys.has('commentVisible') ? !!data.commentVisible : true,
 		anonymous: dataKeys.has('anonymous') ? !!data.anonymous : false,
@@ -143,15 +203,18 @@ router.post('/', async (ctx, next) => {
 		status: 1,
 		timestamp
 	};
+	const deptIds = [];
 	const depts = [];
 	if (data.deptIds && data.deptIds.length) {
 		for (let deptId of data.deptIds) {
 			const dept = await DeptService.getDeptInfo(deptId);
 			depts.push({ deptId, deptName: dept.deptName });
+			deptIds.push(deptId);
 		}
 	}
 
-	queData.depts = depts;
+	queData.deptIds = deptIds.length ? deptIds : [ 1 ];
+	queData.depts = depts || [ { deptId: 1, deptName: config.corpName } ];
 	// 存储问卷主信息
 	const questionnaire = await Questionnaires.create(queData);
 
@@ -183,6 +246,7 @@ router.post('/', async (ctx, next) => {
 * @apiSuccess {Number} errcode 成功为0
 * @apiSuccess {Object} data 投票问卷信息
 * @apiSuccess {Number} data.id 投票问卷活动ID
+* @apiSuccess {Boolean} data.top 是否置顶， true置顶 false不置顶
 * @apiSuccess {String} data.title 投票问卷活动标题
 * @apiSuccess {String} data.video 视屏名称
 * @apiSuccess {String} data.description 描述
@@ -190,7 +254,7 @@ router.post('/', async (ctx, next) => {
 * @apiSuccess {String} data.endTime 结束时间
 * @apiSuccess {String} data.userId 发起人userId
 * @apiSuccess {String} data.userName 发起人姓名
-* @apiSuccess {String} data.phone 发起人手机
+* @apiSuccess {String} data.mobile 发起人手机
 * @apiSuccess {String} data.createdAt  创建时间
 * @apiSuccess {Boolean} data.commentAllowed  是否允许评论
 * @apiSuccess {Boolean} data.commentVisible  评论是否可见
@@ -219,6 +283,24 @@ router.get('/:id', async (ctx, next) => {
 	que = que.toJSON();
 	que.options = await QueOptions.findAll({ where: { questionnaireId: que.id, timestamp: que.timestamp } });
 	ctx.body = ResService.success(que);
+	await next();
+});
+
+/**
+* @api {delete} /api/questionnaires/:id 删除投票问卷
+* @apiName questionnaires-del
+* @apiGroup 投票问卷管理
+* @apiDescription 删除投票问卷
+* @apiHeader {String} authorization 登录token
+* @apiParam {Number} id 投票问卷id
+* @apiSuccess {Number} errcode 成功为0
+* @apiSuccess {Object} data {}
+* @apiError {Number} errcode 失败不为0
+* @apiError {Number} errmsg 错误消息
+*/
+router.delete('/:id', async (ctx, next) => {
+	await Questionnaires.destroy({ where: { id: ctx.params.id } });
+	ctx.body = ResService.success({});
 	await next();
 });
 

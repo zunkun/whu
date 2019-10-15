@@ -1,4 +1,4 @@
-const mysql = require('../core/db/mysql');
+const postgres = require('../core/db/postgres');
 const {	DataTypes,	Model } = require('sequelize');
 
 // 问卷信息，本系统前端为投票
@@ -33,7 +33,7 @@ Questionnaires.init({
 		type: DataTypes.STRING,
 		comment: '发起人姓名'
 	},
-	phone: {
+	mobile: {
 		type: DataTypes.STRING,
 		comment: '发起人手机号码'
 	},
@@ -63,9 +63,13 @@ Questionnaires.init({
 		comment: '单选多选 1-单选 2-多选',
 		defaultValue: 1
 	},
+	deptIds: {
+		type: DataTypes.ARRAY(DataTypes.INTEGER),
+		comment: '参与人员范围,即分会deptId 空则为所有分会，否则为特定分会表'
+	},
 	depts: {
-		type: DataTypes.JSON,
-		comment: '参与人员范围,即分会deptId, deptName 空则为所有分会，否则为特定分会表'
+		type: DataTypes.ARRAY(DataTypes.JSON),
+		comment: '参与人员范围，deptId, deptName'
 	},
 	status: {
 		type: DataTypes.INTEGER,
@@ -82,23 +86,21 @@ Questionnaires.init({
 		comment: '数据流水'
 	}
 }, {
-	sequelize: mysql,
+	sequelize: postgres,
 	modelName: 'questionnaires',
 	comment: '问卷信息，即投票基本信息',
 	paranoid: true
 });
 
-Questionnaires.sync().then(() => {
-	console.log(456);
-});
+Questionnaires.sync();
 // .then(() => {
 // 	console.log(555555555)
 // 	// 处理id,id从1000开始自增
-// 	return mysql.query('SELECT setval(\'questionnaires_id_seq\', max(id)) FROM questionnaires;	')
+// 	return postgres.query('SELECT setval(\'questionnaires_id_seq\', max(id)) FROM questionnaires;	')
 // 		.then(data => {
 // 			let setval = Number(data[0][0].setval);
 // 			if (setval < 1000) {
-// 				return mysql.query('SELECT setval(\'questionnaires_id_seq\', 1000, true);');
+// 				return postgres.query('SELECT setval(\'questionnaires_id_seq\', 1000, true);');
 // 			}
 // 			return Promise.resolve();
 // 		});

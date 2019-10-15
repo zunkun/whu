@@ -11,7 +11,7 @@ module.exports = {
 		host: '127.0.0.1',
 		port: 5432,
 		database: 'whu',
-		username: 'root',
+		username: 'whu',
 		password: 'abcd1234'
 	},
 	secret: 'isssa',

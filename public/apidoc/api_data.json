@@ -109,7 +109,7 @@
             "group": "Success 200",
             "type": "String",
             "optional": false,
-            "field": "data.rows.phone",
+            "field": "data.rows.mobile",
             "description": "<p>投票人员手机</p>"
           },
           {
@@ -354,7 +354,7 @@
             "group": "Success 200",
             "type": "String",
             "optional": false,
-            "field": "data.phone",
+            "field": "data.mobile",
             "description": "<p>投票人员手机</p>"
           },
           {
@@ -606,7 +606,7 @@
             "group": "Success 200",
             "type": "String",
             "optional": false,
-            "field": "data.options.votes.phone",
+            "field": "data.options.votes.mobile",
             "description": "<p>投票人员手机</p>"
           },
           {
@@ -795,7 +795,7 @@
             "group": "Success 200",
             "type": "String",
             "optional": false,
-            "field": "data.rows.phone",
+            "field": "data.rows.mobile",
             "description": "<p>发起人手机</p>"
           },
           {
@@ -1397,7 +1397,7 @@
             "group": "Success 200",
             "type": "String",
             "optional": false,
-            "field": "data.phone",
+            "field": "data.mobile",
             "description": "<p>发起人手机</p>"
           },
           {
@@ -1569,7 +1569,7 @@
   },
   {
     "type": "get",
-    "url": "/api/questionnaires?limit=&page=&title=&status=&userName=&phone=startTime=endTime=",
+    "url": "/api/questionnaires?limit=&page=&title=&status=&userName=&mobile=startTime=endTime=",
     "title": "投票问卷列表",
     "name": "questionnaires_lists",
     "group": "投票问卷管理",
@@ -1629,7 +1629,7 @@
             "group": "Parameter",
             "type": "String",
             "optional": true,
-            "field": "phone",
+            "field": "mobile",
             "description": "<p>发起人手机号</p>"
           },
           {
@@ -1733,7 +1733,7 @@
             "group": "Success 200",
             "type": "String",
             "optional": false,
-            "field": "data.rows.phone",
+            "field": "data.rows.mobile",
             "description": "<p>发起人手机</p>"
           },
           {
