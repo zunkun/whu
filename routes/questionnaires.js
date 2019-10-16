@@ -317,7 +317,7 @@ router.get('/:id', async (ctx, next) => {
 });
 
 /**
-* @api {delete} /api/questionnaires/:id 删除投票问卷
+* @api {post} /api/questionnaires/delete 删除投票问卷
 * @apiName questionnaires-del
 * @apiGroup 投票问卷管理
 * @apiDescription 删除投票问卷
@@ -328,8 +328,13 @@ router.get('/:id', async (ctx, next) => {
 * @apiError {Number} errcode 失败不为0
 * @apiError {Number} errmsg 错误消息
 */
-router.delete('/:id', async (ctx, next) => {
-	await Questionnaires.destroy({ where: { id: ctx.params.id } });
+router.post('/delete', async (ctx, next) => {
+	const { id } = ctx.request.body;
+	if (!id) {
+		ctx.body = ResService.fail('参数不正确');
+		return;
+	}
+	await Questionnaires.destroy({ where: { id } });
 	ctx.body = ResService.success({});
 	await next();
 });

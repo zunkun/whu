@@ -74,7 +74,7 @@ Questionnaires.init({
 	onoff: {
 		type: DataTypes.INTEGER,
 		defaultValue: 0,
-		comment: '状态 0-上架下架未设置 1-已上架 2-已下架'
+		comment: '上架下架 0-上架下架未设置 1-已上架 2-已下架'
 	},
 	top: {
 		type: DataTypes.BOOLEAN,

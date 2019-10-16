@@ -1281,8 +1281,8 @@
     "groupTitle": "投票问卷管理"
   },
   {
-    "type": "delete",
-    "url": "/api/questionnaires/:id",
+    "type": "post",
+    "url": "/api/questionnaires/delete",
     "title": "删除投票问卷",
     "name": "questionnaires_del",
     "group": "投票问卷管理",
