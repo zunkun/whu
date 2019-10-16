@@ -7,7 +7,7 @@ const QueOptions = require('../models/QueOptions');
 const DingDepts = require('../models/DingDepts');
 const DeptStaffs = require('../models/DeptStaffs');
 const jwt = require('jsonwebtoken');
-const DeptService = require('../services/DeptService');
+const deptStaffService = require('../services/deptStaffService');
 const config = require('../config');
 router.prefix('/api/questionnaires');
 
@@ -20,7 +20,7 @@ router.prefix('/api/questionnaires');
 * @apiParam {Number} [limit] 分页条数，默认10
 * @apiParam {Number} [page] 第几页，默认1
 * @apiParam {String} [title] 活动标题
-* @apiParam {Number} [onoff] 状态 0-上架下架 0-上架下架未设置 1-已上架 2-已下架
+* @apiParam {Number} [onoff] 上架下架状态 0-上架下架未设置 1-已上架 2-已下架，不填写表示所有的
 * @apiParam {String} [userName] 发起人姓名
 * @apiParam {String} [mobile] 发起人手机号
 * @apiParam {String} [startDate] 开始日期,格式 2019-09-24,【已废弃】请使用 startTime
@@ -57,7 +57,10 @@ router.get('/', async (ctx, next) => {
 	[ 'title', 'userName', 'mobile' ].map(key => {
 		if (query[key]) where[key] = { [Op.like]: `%${query[key]}%` };
 	});
-	if (query.onoff) where.onoff = Number(query.onoff);
+	if (query.onoff || query.onoff === 0 || query.onoff === '0') {
+		where.onoff = Number(query.onoff);
+	}
+
 	if (query.startDate) {
 		let time = new Date(query.startDate);
 		time.setHours(0, 0, 0, 0);
@@ -188,6 +191,7 @@ router.get('/ques', async (ctx, next) => {
 * @apiParam {Boolean} [realTimeVisiable] 实时结果是否对用户可视，默认为 true
 * @apiParam {Number} [selectionNum] 单选多选 1-单选 2-多选, 默认为1 单选
 * @apiParam {Number[]} [deptIds] 参与人范围所在部门ID, 不传该值则为所有部门人员都可以参与
+* @apiParam {Number[]} [participantIds] 参与人员信息，【注意】此参与人员是专指钉钉单独选择人员参与投票信息
 * @apiSuccess {Number} errcode 成功为0
 * @apiSuccess {Object} data 投票问卷信息
 * @apiSuccess {Number} data.id 投票问卷ID
@@ -237,9 +241,19 @@ router.post('/', async (ctx, next) => {
 	const depts = [];
 	if (data.deptIds && data.deptIds.length) {
 		for (let deptId of data.deptIds) {
-			const dept = await DeptService.getDeptInfo(deptId);
+			const dept = await deptStaffService.getDeptInfo(deptId);
 			depts.push({ deptId, deptName: dept.deptName });
 			deptIds.push(deptId);
+		}
+	}
+
+	const participantIds = [];
+	const participants = [];
+	if (data.participantIds && data.participantIds.length) {
+		for (let userId of data.participantIds) {
+			let staff = await deptStaffService.getStaff(userId);
+			participants.push({ userId, userName: staff.userName });
+			participantIds.push(userId);
 		}
 	}
 

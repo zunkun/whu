@@ -1,9 +1,9 @@
 const postgres = require('../core/db/postgres');
 const { DataTypes, Model } = require('sequelize');
 
-// 评论
-class Comments extends Model {}
-Comments.init({
+// 提问
+class Questions extends Model {}
+Questions.init({
 	userId: {
 		type: DataTypes.STRING,
 		comment: '钉钉userId'
@@ -15,7 +15,7 @@ Comments.init({
 	visible: {
 		type: DataTypes.BOOLEAN,
 		defaultValue: false,
-		comment: '评论是否显示 true 显示 false 隐藏'
+		comment: '提问是否显示 true 显示 false 隐藏'
 	},
 	referId: {
 		type: DataTypes.INTEGER,
@@ -23,10 +23,10 @@ Comments.init({
 	},
 	belongsTo: {
 		type: DataTypes.INTEGER,
-		comment: '该评论属于 1-在线学习课程'
+		comment: '该提问属于 1-在线学习课程'
 	}
-}, { sequelize: postgres, modelName: 'comments', timestamps: false, paranoid: true, comment: '评论' });
+}, { sequelize: postgres, modelName: 'questions', timestamps: false, paranoid: true, comment: '提问' });
 
-Comments.sync();
+Questions.sync();
 
-module.exports = Comments;
+module.exports = Questions;

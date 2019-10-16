@@ -82,14 +82,14 @@ router.get('/signature', async (ctx, next) => {
 */
 router.get('/login', async (ctx, next) => {
 	let code = ctx.query.code;
-	let userId = ctx.query.userId;
-	if (!userId || userId === 'undefined') {
-		userId = '4508346521365159';
-		const user = await DingStaffs.findOne({ where: { userId } });
-		const token = jwt.sign({ userId: user.userId, userName: user.userName, jobnumber: user.jobnumber, mobile: user.mobile }, config.secret);
-		ctx.body = ResService.success({ user, token: 'Bearer ' + token });
-		return;
-	}
+	// let userId = ctx.query.userId;
+	// if (!userId || userId === 'undefined') {
+	// 	userId = '4508346521365159';
+	// 	const user = await DingStaffs.findOne({ where: { userId } });
+	// 	const token = jwt.sign({ userId: user.userId, userName: user.userName, jobnumber: user.jobnumber, mobile: user.mobile }, config.secret);
+	// 	ctx.body = ResService.success({ user, token: 'Bearer ' + token });
+	// 	return;
+	// }
 
 	try {
 		const userInfo = await dingding.getuserinfo(code);
