@@ -104,6 +104,8 @@ router.get('/login', async (ctx, next) => {
 				ctx.body = ResService.fail(user.errmsg, user.errcode);
 			}
 			user = { userId: user.userid, userName: user.name, jobnumber: user.jobnumber, mobile: user.mobile };
+		} else {
+			user = user.toJSON();
 		}
 
 		if (!user) {
