@@ -269,6 +269,10 @@ router.post('/', async (ctx, next) => {
 	queData.depts = depts || [ { deptId: 1, deptName: config.corpName } ];
 	queData.specialUserIds = specialUserIds;
 	queData.specialUsers = specialUsers;
+	if (!deptIds.length && !specialUserIds.length) {
+		queData.deptIds = [ 1 ];
+		queData.depts = [ { deptId: 1, deptName: config.corpName } ];
+	}
 	// 存储问卷主信息
 	const questionnaire = await Questionnaires.create(queData);
 
@@ -444,13 +448,16 @@ router.put('/:id', async (ctx, next) => {
 			specialUserIds.push(userId);
 		}
 	}
-	if (dataKeys.has('deptIds')) {
+	if (dataKeys.has('deptIds') || dataKeys.has('specialUserIds')) {
 		queData.depts = depts;
 		queData.deptIds = deptIds;
-	}
-	if (dataKeys.has('specialUserIds')) {
 		queData.specialUserIds = specialUserIds;
 		queData.specialUsers = specialUsers;
+
+		if (!deptIds.length && !specialUserIds.length) {
+			queData.deptIds = [ 1 ];
+			queData.depts = [ { deptId: 1, deptName: config.corpName } ];
+		}
 	}
 	await Questionnaires.update(queData, { where: { id: ctx.params.id } });
 
