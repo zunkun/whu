@@ -14,7 +14,7 @@ module.exports = {
 		username: 'whu',
 		password: 'abcd1234'
 	},
-	secret: 'isssa',
+	secret: 'whu',
 	baseDeptId: 1,
 	dingBaseUri: 'https://oapi.dingtalk.com',
 	corpId: 'dingcbcbb63d3edd5478',
