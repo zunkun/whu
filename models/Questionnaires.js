@@ -71,13 +71,13 @@ Questionnaires.init({
 		type: DataTypes.ARRAY(DataTypes.JSON),
 		comment: '参与人员范围，deptId, deptName'
 	},
-	participantIds: {
+	specialUserIds: {
 		type: DataTypes.ARRAY(DataTypes.STRING),
-		comment: '参与人员userId表，注意此和dept下的人员是平级，可以同时选择'
+		comment: '特殊参与人员userId表，注意此和dept下的人员是平级，可以同时选择'
 	},
-	participants: {
+	specialUsers: {
 		type: DataTypes.ARRAY(DataTypes.JSON),
-		comment: '参与人员，本人员是部门列表外人员, userId, userName'
+		comment: '特殊参与人员，本人员是部门列表外人员, userId, userName'
 	},
 	onoff: {
 		type: DataTypes.INTEGER,

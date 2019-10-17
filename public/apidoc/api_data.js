@@ -955,24 +955,17 @@ define({ "api": [
           },
           {
             "group": "Parameter",
-            "type": "Object[]",
+            "type": "Number[]",
             "optional": true,
-            "field": "depts",
-            "description": "<p>投票范围</p>"
+            "field": "deptIds",
+            "description": "<p>参与人范围所在部门ID列表，例如[1,2,3], 不传该值则为所有部门人员都可以参与</p>"
           },
           {
             "group": "Parameter",
-            "type": "String",
-            "optional": false,
-            "field": "depts.deptId",
-            "description": "<p>部门id</p>"
-          },
-          {
-            "group": "Parameter",
-            "type": "String",
-            "optional": false,
-            "field": "depts.deptName",
-            "description": "<p>部门名称</p>"
+            "type": "Number[]",
+            "optional": true,
+            "field": "specialUserIds",
+            "description": "<p>特别选择参与人员userId表，例如 [1, 2, 3]，【注意】此参与人员是专指钉钉单独选择人员参与投票信息</p>"
           },
           {
             "group": "Parameter",
@@ -1224,7 +1217,14 @@ define({ "api": [
             "type": "Number[]",
             "optional": true,
             "field": "deptIds",
-            "description": "<p>参与人范围所在部门ID, 不传该值则为所有部门人员都可以参与</p>"
+            "description": "<p>参与人范围所在部门ID列表，例如[1,2,3], 不传该值则为所有部门人员都可以参与</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "Number[]",
+            "optional": true,
+            "field": "specialUserIds",
+            "description": "<p>特别选择参与人员userId表，例如 [1, 2, 3]，【注意】此参与人员是专指钉钉单独选择人员参与投票信息</p>"
           }
         ]
       }
@@ -1522,9 +1522,9 @@ define({ "api": [
           {
             "group": "Success 200",
             "type": "Object[]",
-            "optional": true,
+            "optional": false,
             "field": "data.depts",
-            "description": "<p>投票范围</p>"
+            "description": "<p>投票范围部门信息</p>"
           },
           {
             "group": "Success 200",
@@ -1539,6 +1539,20 @@ define({ "api": [
             "optional": false,
             "field": "data.depts.deptName",
             "description": "<p>部门名称</p>"
+          },
+          {
+            "group": "Success 200",
+            "type": "Object[]",
+            "optional": false,
+            "field": "data.specialUsers",
+            "description": "<p>投票范围特别参与人员</p>"
+          },
+          {
+            "group": "Success 200",
+            "type": "String",
+            "optional": false,
+            "field": "data.specialUsers.userId",
+            "description": "<p>人员userId</p>"
           },
           {
             "group": "Success 200",
@@ -1693,7 +1707,7 @@ define({ "api": [
             "type": "Number",
             "optional": true,
             "field": "onoff",
-            "description": "<p>状态 0-上架下架 0-上架下架未设置 1-已上架 2-已下架</p>"
+            "description": "<p>上架下架状态 0-上架下架未设置 1-已上架 2-已下架，不填写表示所有的</p>"
           },
           {
             "group": "Parameter",
@@ -1861,6 +1875,27 @@ define({ "api": [
             "optional": false,
             "field": "data.rows.depts.deptName",
             "description": "<p>部门名称</p>"
+          },
+          {
+            "group": "Success 200",
+            "type": "Object[]",
+            "optional": false,
+            "field": "data.rows.specialUsers",
+            "description": "<p>特殊选择参与人员</p>"
+          },
+          {
+            "group": "Success 200",
+            "type": "String",
+            "optional": false,
+            "field": "data.rows.specialUsers.userId",
+            "description": "<p>特殊选择参与人员userId</p>"
+          },
+          {
+            "group": "Success 200",
+            "type": "String",
+            "optional": false,
+            "field": "data.rows.specialUsers.userName",
+            "description": "<p>特殊选择参与人员userName</p>"
           }
         ]
       }
@@ -2141,6 +2176,27 @@ define({ "api": [
             "optional": false,
             "field": "data.rows.depts.deptName",
             "description": "<p>部门名称</p>"
+          },
+          {
+            "group": "Success 200",
+            "type": "Object[]",
+            "optional": false,
+            "field": "data.rows.specialUsers",
+            "description": "<p>特殊选择参与人员</p>"
+          },
+          {
+            "group": "Success 200",
+            "type": "String",
+            "optional": false,
+            "field": "data.rows.specialUsers.userId",
+            "description": "<p>特殊选择参与人员userId</p>"
+          },
+          {
+            "group": "Success 200",
+            "type": "String",
+            "optional": false,
+            "field": "data.rows.specialUsers.userName",
+            "description": "<p>特殊选择参与人员userName</p>"
           }
         ]
       }
@@ -2583,14 +2639,14 @@ define({ "api": [
             "group": "Success 200",
             "type": "Number",
             "optional": false,
-            "field": "data.coursetypeId",
+            "field": "data.typeId",
             "description": "<p>课程类型ID</p>"
           },
           {
             "group": "Success 200",
             "type": "String",
             "optional": false,
-            "field": "data.coursetypeName",
+            "field": "data.typeName",
             "description": "<p>课程类型名称</p>"
           },
           {
@@ -2630,66 +2686,87 @@ define({ "api": [
           },
           {
             "group": "Success 200",
+            "type": "Date",
+            "optional": false,
+            "field": "data.onTime",
+            "description": "<p>上架时间</p>"
+          },
+          {
+            "group": "Success 200",
+            "type": "Date",
+            "optional": false,
+            "field": "data.offTime",
+            "description": "<p>下架时间</p>"
+          },
+          {
+            "group": "Success 200",
+            "type": "Number",
+            "optional": false,
+            "field": "data.onoff",
+            "description": "<p>上架下架状态 0-未设置该状态 1-课程上架  2-课程下架</p>"
+          },
+          {
+            "group": "Success 200",
             "type": "Object[]",
             "optional": false,
-            "field": "data.courses",
+            "field": "data.chapters",
             "description": "<p>章节课程列表</p>"
           },
           {
             "group": "Success 200",
             "type": "Number",
             "optional": false,
-            "field": "data.courses.id",
+            "field": "data.chapters.id",
             "description": "<p>章ID</p>"
           },
           {
             "group": "Success 200",
             "type": "Number",
             "optional": false,
-            "field": "data.courses.sequence",
+            "field": "data.chapters.sequence",
             "description": "<p>章序号，比如 1表示第一章 2表示第二章 以此类推</p>"
           },
           {
             "group": "Success 200",
             "type": "String",
             "optional": false,
-            "field": "data.courses.title",
+            "field": "data.chapters.title",
             "description": "<p>章标题，比如第一章：武大校友会现状</p>"
           },
           {
             "group": "Success 200",
             "type": "Object[]",
             "optional": false,
-            "field": "data.courses.chapters",
+            "field": "data.chapters.lessons",
             "description": "<p>节列表</p>"
           },
           {
             "group": "Success 200",
             "type": "Number",
             "optional": false,
-            "field": "data.courses.chapters.id",
+            "field": "data.chapters.lessons.id",
             "description": "<p>节ID</p>"
           },
           {
             "group": "Success 200",
             "type": "Number",
             "optional": false,
-            "field": "data.courses.chapters.sequence",
-            "description": "<p>章节序号，1-表示 第一节课 2-第二节课</p>"
+            "field": "data.chapters.lessons.sequence",
+            "description": "<p>节序号，1-表示 第一节课 2-第二节课</p>"
           },
           {
             "group": "Success 200",
             "type": "String",
             "optional": false,
-            "field": "data.courses.chapters.title",
+            "field": "data.chapters.lessons.title",
             "description": "<p>节标题</p>"
           },
           {
             "group": "Success 200",
             "type": "String",
             "optional": false,
-            "field": "data.courses.chapters.video",
-            "description": "<p>章节视屏名称</p>"
+            "field": "data.chapters.lessons.video",
+            "description": "<p>节视屏名称</p>"
           }
         ]
       }
@@ -2752,7 +2829,7 @@ define({ "api": [
             "group": "Parameter",
             "type": "Number",
             "optional": true,
-            "field": "coursetypeId",
+            "field": "typeId",
             "description": "<p>课程类型ID</p>"
           },
           {
@@ -2780,36 +2857,50 @@ define({ "api": [
             "group": "Parameter",
             "type": "Object[]",
             "optional": true,
-            "field": "courses",
-            "description": "<p>课程信息</p>"
+            "field": "chapters",
+            "description": "<p>课程章信息</p>"
           },
           {
             "group": "Parameter",
             "type": "String",
             "optional": false,
-            "field": "courses.title",
+            "field": "chapters.sequence",
+            "description": "<p>章排序 1表示第一章 2表示第二章以此类推</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "String",
+            "optional": false,
+            "field": "chapters.title",
             "description": "<p>章名称，比如 第一章名称</p>"
           },
           {
             "group": "Parameter",
             "type": "Object[]",
             "optional": false,
-            "field": "courses.chapters",
+            "field": "chapters.lessons",
             "description": "<p>节信息</p>"
           },
           {
             "group": "Parameter",
             "type": "String",
             "optional": false,
-            "field": "courses.chapters.title",
-            "description": "<p>节名称</p>"
+            "field": "chapters.lessons.sequence",
+            "description": "<p>课程节排序 1-第一节 2-第二节 以此类推</p>"
           },
           {
             "group": "Parameter",
             "type": "String",
             "optional": false,
-            "field": "courses.chapters.video",
-            "description": "<p>视屏名称</p>"
+            "field": "chapters.lessons.title",
+            "description": "<p>课程节节名称</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "String",
+            "optional": false,
+            "field": "courses.lessons.video",
+            "description": "<p>课程节视屏名称</p>"
           }
         ]
       }
@@ -2829,14 +2920,7 @@ define({ "api": [
             "type": "Object",
             "optional": false,
             "field": "data",
-            "description": "<p>课程信息</p>"
-          },
-          {
-            "group": "Success 200",
-            "type": "Number",
-            "optional": false,
-            "field": "data.id",
-            "description": "<p>课程ID</p>"
+            "description": "<p>{}</p>"
           }
         ]
       }
@@ -2867,7 +2951,7 @@ define({ "api": [
   },
   {
     "type": "get",
-    "url": "/api/courses?limit=&page=&keywords=&title=&startDay=&endDay=coursetypeId=&status=",
+    "url": "/api/courses?limit=&page=&keywords=&title=&startTime=&endTime=typeId=",
     "title": "获取课程列表",
     "name": "course_lists",
     "group": "课程管理",
@@ -2911,30 +2995,23 @@ define({ "api": [
           },
           {
             "group": "Parameter",
-            "type": "Number",
+            "type": "Date",
             "optional": true,
-            "field": "status",
-            "description": "<p>课程状态 0-未设置 1-已上线课程 2-已下线课程，默认查询所有状态课程</p>"
+            "field": "startTime",
+            "description": "<p>创建时间开始日期，例如 2019-09-03 08:00</p>"
           },
           {
             "group": "Parameter",
             "type": "Date",
             "optional": true,
-            "field": "startDay",
-            "description": "<p>创建时间开始日期，例如 2019-09-03</p>"
+            "field": "endTime",
+            "description": "<p>创建时间结束日期，例如 2019-09-03 08:00</p>"
           },
           {
             "group": "Parameter",
             "type": "Date",
             "optional": true,
-            "field": "endDay",
-            "description": "<p>创建时间结束日期，例如 2019-09-03</p>"
-          },
-          {
-            "group": "Parameter",
-            "type": "Date",
-            "optional": true,
-            "field": "coursetypeId",
+            "field": "typeId",
             "description": "<p>课程类型ID</p>"
           }
         ]
@@ -2989,14 +3066,14 @@ define({ "api": [
             "group": "Success 200",
             "type": "Number",
             "optional": false,
-            "field": "data.rows.coursetypeId",
+            "field": "data.rows.typeId",
             "description": "<p>课程类型ID</p>"
           },
           {
             "group": "Success 200",
             "type": "String",
             "optional": false,
-            "field": "data.rows.coursetypeName",
+            "field": "data.rows.typeName",
             "description": "<p>课程类型名称</p>"
           },
           {
@@ -3036,10 +3113,31 @@ define({ "api": [
           },
           {
             "group": "Success 200",
+            "type": "Date",
+            "optional": false,
+            "field": "data.rows.onTime",
+            "description": "<p>上架时间</p>"
+          },
+          {
+            "group": "Success 200",
+            "type": "Date",
+            "optional": false,
+            "field": "data.rows.offTime",
+            "description": "<p>下架时间</p>"
+          },
+          {
+            "group": "Success 200",
             "type": "Number",
             "optional": false,
-            "field": "data.rows.courseCount",
-            "description": "<p>当前课程总章节数目</p>"
+            "field": "data.rows.onoff",
+            "description": "<p>上架下架状态 0-未设置该状态 1-课程上架  2-课程下架</p>"
+          },
+          {
+            "group": "Success 200",
+            "type": "Number",
+            "optional": false,
+            "field": "data.rows.lessonCount",
+            "description": "<p>当前课程总节数</p>"
           },
           {
             "group": "Success 200",
@@ -3270,7 +3368,7 @@ define({ "api": [
             "group": "Parameter",
             "type": "Number",
             "optional": false,
-            "field": "coursetypeId",
+            "field": "typeId",
             "description": "<p>课程类型ID</p>"
           },
           {
@@ -3298,50 +3396,50 @@ define({ "api": [
             "group": "Parameter",
             "type": "Object[]",
             "optional": false,
-            "field": "courses",
-            "description": "<p>课程信息</p>"
+            "field": "chapters",
+            "description": "<p>课程章信息</p>"
           },
           {
             "group": "Parameter",
             "type": "String",
             "optional": false,
-            "field": "courses.sequence",
+            "field": "chapters.sequence",
             "description": "<p>章排序 1表示第一章 2表示第二章以此类推</p>"
           },
           {
             "group": "Parameter",
             "type": "String",
             "optional": false,
-            "field": "courses.title",
+            "field": "chapters.title",
             "description": "<p>章名称，比如 第一章名称</p>"
           },
           {
             "group": "Parameter",
             "type": "Object[]",
             "optional": false,
-            "field": "courses.chapters",
+            "field": "chapters.lessons",
             "description": "<p>节信息</p>"
           },
           {
             "group": "Parameter",
             "type": "String",
             "optional": false,
-            "field": "courses.chapters.sequence",
-            "description": "<p>节排序 1-第一节 2-第二节 以此类推</p>"
+            "field": "chapters.lessons.sequence",
+            "description": "<p>课程节排序 1-第一节 2-第二节 以此类推</p>"
           },
           {
             "group": "Parameter",
             "type": "String",
             "optional": false,
-            "field": "courses.chapters.title",
-            "description": "<p>节名称</p>"
+            "field": "chapters.lessons.title",
+            "description": "<p>课程节节名称</p>"
           },
           {
             "group": "Parameter",
             "type": "String",
             "optional": false,
-            "field": "courses.chapters.video",
-            "description": "<p>视屏名称</p>"
+            "field": "courses.lessons.video",
+            "description": "<p>课程节视屏名称</p>"
           }
         ]
       }
@@ -3450,6 +3548,161 @@ define({ "api": [
           {
             "group": "Success 200",
             "type": "Object",
+            "optional": false,
+            "field": "data",
+            "description": "<p>投票问卷信息</p>"
+          },
+          {
+            "group": "Success 200",
+            "type": "Number",
+            "optional": false,
+            "field": "data.id",
+            "description": "<p>课程类型ID</p>"
+          },
+          {
+            "group": "Success 200",
+            "type": "String",
+            "optional": false,
+            "field": "data.name",
+            "description": "<p>课程类型名称</p>"
+          }
+        ]
+      }
+    },
+    "error": {
+      "fields": {
+        "Error 4xx": [
+          {
+            "group": "Error 4xx",
+            "type": "Number",
+            "optional": false,
+            "field": "errcode",
+            "description": "<p>失败不为0</p>"
+          },
+          {
+            "group": "Error 4xx",
+            "type": "Number",
+            "optional": false,
+            "field": "errmsg",
+            "description": "<p>错误消息</p>"
+          }
+        ]
+      }
+    },
+    "version": "0.0.0",
+    "filename": "routes/courses.js",
+    "groupTitle": "课程管理"
+  },
+  {
+    "type": "post",
+    "url": "/api/courses/typedelete",
+    "title": "删除课程类型",
+    "name": "course_type_delete",
+    "group": "课程管理",
+    "description": "<p>删除课程类型</p>",
+    "header": {
+      "fields": {
+        "Header": [
+          {
+            "group": "Header",
+            "type": "String",
+            "optional": false,
+            "field": "authorization",
+            "description": "<p>登录token</p>"
+          }
+        ]
+      }
+    },
+    "parameter": {
+      "fields": {
+        "Parameter": [
+          {
+            "group": "Parameter",
+            "type": "Number",
+            "optional": false,
+            "field": "id",
+            "description": "<p>课程类型id</p>"
+          }
+        ]
+      }
+    },
+    "success": {
+      "fields": {
+        "Success 200": [
+          {
+            "group": "Success 200",
+            "type": "Number",
+            "optional": false,
+            "field": "errcode",
+            "description": "<p>成功为0</p>"
+          },
+          {
+            "group": "Success 200",
+            "type": "Object",
+            "optional": false,
+            "field": "data",
+            "description": "<p>{}</p>"
+          }
+        ]
+      }
+    },
+    "error": {
+      "fields": {
+        "Error 4xx": [
+          {
+            "group": "Error 4xx",
+            "type": "Number",
+            "optional": false,
+            "field": "errcode",
+            "description": "<p>失败不为0</p>"
+          },
+          {
+            "group": "Error 4xx",
+            "type": "Number",
+            "optional": false,
+            "field": "errmsg",
+            "description": "<p>错误消息</p>"
+          }
+        ]
+      }
+    },
+    "version": "0.0.0",
+    "filename": "routes/courses.js",
+    "groupTitle": "课程管理"
+  },
+  {
+    "type": "get",
+    "url": "/api/courses/typelists",
+    "title": "课程类型列表",
+    "name": "course_type_lists",
+    "group": "课程管理",
+    "description": "<p>课程类型列表</p>",
+    "header": {
+      "fields": {
+        "Header": [
+          {
+            "group": "Header",
+            "type": "String",
+            "optional": false,
+            "field": "authorization",
+            "description": "<p>登录token</p>"
+          }
+        ]
+      }
+    },
+    "success": {
+      "fields": {
+        "Success 200": [
+          {
+            "group": "Success 200",
+            "type": "Number",
+            "optional": false,
+            "field": "errcode",
+            "description": "<p>成功为0</p>"
+          },
+          {
+            "group": "Success 200",
+            "type": "Object[]",
             "optional": false,
             "field": "data",
             "description": "<p>投票问卷信息</p>"

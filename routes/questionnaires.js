@@ -44,6 +44,9 @@ router.prefix('/api/questionnaires');
 * @apiSuccess {Object[]} data.rows.depts  投票范围
 * @apiSuccess {String} data.rows.depts.deptId  部门id
 * @apiSuccess {String} data.rows.depts.deptName 部门名称
+* @apiSuccess {Object[]} data.rows.specialUsers  特殊选择参与人员
+* @apiSuccess {String} data.rows.specialUsers.userId  特殊选择参与人员userId
+* @apiSuccess {String} data.rows.specialUsers.userName  特殊选择参与人员userName
 * @apiError {Number} errcode 失败不为0
 * @apiError {Number} errmsg 错误消息
 */
@@ -88,7 +91,7 @@ router.get('/', async (ctx, next) => {
 		where,
 		limit,
 		offset,
-		attributes: [ 'id', 'title', 'description', 'userId', 'userName', 'mobile', 'createdAt', 'startTime', 'endTime', 'depts', 'onoff' ],
+		attributes: [ 'id', 'title', 'description', 'userId', 'userName', 'mobile', 'createdAt', 'startTime', 'endTime', 'depts', 'onoff', 'specialUsers' ],
 		order: [ [ 'top', 'DESC' ], [ 'createdAt', 'DESC' ] ]
 	});
 	ctx.body = ResService.success(res);
@@ -121,6 +124,9 @@ router.get('/', async (ctx, next) => {
 * @apiSuccess {Object[]} data.rows.depts  投票范围
 * @apiSuccess {String} data.rows.depts.deptId  部门id
 * @apiSuccess {String} data.rows.depts.deptName 部门名称
+* @apiSuccess {Object[]} data.rows.specialUsers  特殊选择参与人员
+* @apiSuccess {String} data.rows.specialUsers.userId  特殊选择参与人员userId
+* @apiSuccess {String} data.rows.specialUsers.userName  特殊选择参与人员userName
 * @apiError {Number} errcode 失败不为0
 * @apiError {Number} errmsg 错误消息
 */
@@ -155,13 +161,15 @@ router.get('/ques', async (ctx, next) => {
 	}
 
 	deptIds = Array.from(new Set(deptIds));
-	where.deptIds = { [Op.overlap]: deptIds };
+	if (!where[Op.or]) where[Op.or] = [];
+	where[Op.or].push({ deptIds: { [Op.overlap]: deptIds } });
+	where[Op.or].push({ specialUserIds: { [Op.contains]: [ user.userId ] } });
 
 	const res = await Questionnaires.findAndCountAll({
 		where,
 		limit,
 		offset,
-		attributes: [ 'id', 'top', 'title', 'description', 'onoff', 'userId', 'userName', 'mobile', 'createdAt', 'startTime', 'endTime', 'depts' ],
+		attributes: [ 'id', 'top', 'title', 'description', 'onoff', 'userId', 'userName', 'mobile', 'createdAt', 'startTime', 'endTime', 'depts', 'specialUsers' ],
 		order: [ [ 'top', 'DESC' ], [ 'createdAt', 'DESC' ] ]
 	});
 	ctx.body = ResService.success(res);
@@ -190,8 +198,8 @@ router.get('/ques', async (ctx, next) => {
 * @apiParam {Boolean} [anonymous] 是否匿名投票，默认为 false
 * @apiParam {Boolean} [realTimeVisiable] 实时结果是否对用户可视，默认为 true
 * @apiParam {Number} [selectionNum] 单选多选 1-单选 2-多选, 默认为1 单选
-* @apiParam {Number[]} [deptIds] 参与人范围所在部门ID, 不传该值则为所有部门人员都可以参与
-* @apiParam {Number[]} [participantIds] 参与人员信息，【注意】此参与人员是专指钉钉单独选择人员参与投票信息
+* @apiParam {Number[]} [deptIds] 参与人范围所在部门ID列表，例如[1,2,3], 不传该值则为所有部门人员都可以参与
+* @apiParam {Number[]} [specialUserIds] 特别选择参与人员userId表，例如 [1, 2, 3]，【注意】此参与人员是专指钉钉单独选择人员参与投票信息
 * @apiSuccess {Number} errcode 成功为0
 * @apiSuccess {Object} data 投票问卷信息
 * @apiSuccess {Number} data.id 投票问卷ID
@@ -247,18 +255,20 @@ router.post('/', async (ctx, next) => {
 		}
 	}
 
-	const participantIds = [];
-	const participants = [];
-	if (data.participantIds && data.participantIds.length) {
-		for (let userId of data.participantIds) {
+	const specialUserIds = [];
+	const specialUsers = [];
+	if (data.specialUserIds && data.specialUserIds.length) {
+		for (let userId of data.specialUserIds) {
 			let staff = await deptStaffService.getStaff(userId);
-			participants.push({ userId, userName: staff.userName });
-			participantIds.push(userId);
+			specialUsers.push({ userId, userName: staff.userName });
+			specialUserIds.push(userId);
 		}
 	}
 
 	queData.deptIds = deptIds.length ? deptIds : [ 1 ];
 	queData.depts = depts || [ { deptId: 1, deptName: config.corpName } ];
+	queData.specialUserIds = specialUserIds;
+	queData.specialUsers = specialUsers;
 	// 存储问卷主信息
 	const questionnaire = await Questionnaires.create(queData);
 
@@ -305,9 +315,12 @@ router.post('/', async (ctx, next) => {
 * @apiSuccess {Boolean} data.anonymous  是否匿名投票
 * @apiSuccess {Boolean} data.realTimeVisiable  实时结果是否对用户可视
 * @apiSuccess {Number} data.selectionNum  单选多选 1-单选 2-多选
-* @apiSuccess {Object[]} [data.depts]  投票范围
+* @apiSuccess {Object[]} data.depts  投票范围部门信息
 * @apiSuccess {String} data.depts.deptId  部门id
 * @apiSuccess {String} data.depts.deptName 部门名称
+* @apiSuccess {Object[]} data.specialUsers  投票范围特别参与人员
+* @apiSuccess {String} data.specialUsers.userId 人员userId
+* @apiSuccess {String} data.specialUsers.userId 人员userName
 * @apiSuccess {String} data.onoff 上架下架 0-上架下架未设置 1-已上架 2-已下架
 * @apiSuccess {Object[]} data.options  选项列表
 * @apiSuccess {Number} data.options.id  选项数据ID
@@ -370,9 +383,8 @@ router.post('/delete', async (ctx, next) => {
 * @apiParam {Boolean} [anonymous]  是否匿名投票
 * @apiParam {Boolean} [realTimeVisiable]  实时结果是否对用户可视
 * @apiParam {Number} [selectionNum]  单选多选 1-单选 2-多选
-* @apiParam {Object[]} [depts]  投票范围
-* @apiParam {String} depts.deptId  部门id
-* @apiParam {String} depts.deptName 部门名称
+* @apiParam {Number[]} [deptIds] 参与人范围所在部门ID列表，例如[1,2,3], 不传该值则为所有部门人员都可以参与
+* @apiParam {Number[]} [specialUserIds] 特别选择参与人员userId表，例如 [1, 2, 3]，【注意】此参与人员是专指钉钉单独选择人员参与投票信息
 * @apiParam {Object[]} [options]  选项列表
 * @apiParam {Number} options.[id]  选项数据ID,传递ID做更新操作，不传值则为创建新选项操作
 * @apiParam {Number} options.sequence  选项排序
@@ -415,18 +427,30 @@ router.put('/:id', async (ctx, next) => {
 
 	const depts = [];
 	const deptIds = [];
-
 	if (data.deptIds && data.deptIds.length) {
 		for (let deptId of data.deptIds) {
-			const dept = await DeptService.getDeptInfo(deptId);
+			const dept = await deptStaffService.getDeptInfo(deptId);
 			depts.push({ deptId, deptName: dept.deptName });
 			deptIds.push(deptId);
 		}
 	}
-	// 更新主数据
+
+	const specialUserIds = [];
+	const specialUsers = [];
+	if (data.specialUserIds && data.specialUserIds.length) {
+		for (let userId of data.specialUserIds) {
+			let staff = await deptStaffService.getStaff(userId);
+			specialUsers.push({ userId, userName: staff.userName });
+			specialUserIds.push(userId);
+		}
+	}
 	if (dataKeys.has('deptIds')) {
 		queData.depts = depts;
 		queData.deptIds = deptIds;
+	}
+	if (dataKeys.has('specialUserIds')) {
+		queData.specialUserIds = specialUserIds;
+		queData.specialUsers = specialUsers;
 	}
 	await Questionnaires.update(queData, { where: { id: ctx.params.id } });
 
