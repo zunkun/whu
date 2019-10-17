@@ -186,8 +186,7 @@ router.get('/ques', async (ctx, next) => {
 * @apiParam {Date} endTime 截止时间 格式 2019-08-24 08:00:00
 * @apiParam {Object[]} options 问卷选项详细信息
 * @apiParam {Number} options.sequence 选项排序 例如1,2,3
-* @apiParam {Number} options.type 选项类型 1-图文类型 2-文字类型
-* @apiParam {String} options.title '选项标题'
+]\* @apiParam {String} options.title '选项标题'
 * @apiParam {String} options.[description] '描述'
 * @apiParam {String} options.[image] '图片名称'
 * @apiParam {String} options.[video] '视屏名称'
@@ -215,7 +214,7 @@ router.post('/', async (ctx, next) => {
 	if (!options || !options.length) valid = false;
 
 	for (let option of (options || [])) {
-		[ 'sequence', 'title', 'type' ].map(key => {
+		[ 'sequence', 'title' ].map(key => {
 			if (!option[key]) valid = false;
 		});
 		if (!valid) break;
@@ -280,7 +279,7 @@ router.post('/', async (ctx, next) => {
 	let optionDatas = [];
 	for (let option of options) {
 		const optionData = { questionnaireId: questionnaire.id, timestamp };
-		[ 'sequence', 'type', 'title', 'description', 'image', 'video' ].map(key => {
+		[ 'sequence', 'title', 'description', 'image', 'video' ].map(key => {
 			if (option[key]) {
 				optionData[key] = option[key];
 			}
@@ -330,7 +329,6 @@ router.post('/', async (ctx, next) => {
 * @apiSuccess {Number} data.options.id  选项数据ID
 * @apiSuccess {Number} data.options.questionnaireId  问卷主数据ID
 * @apiSuccess {Number} data.options.sequence  选项排序
-* @apiSuccess {Number} data.options.type 选项类型 1-图文类型 2-文字类型
 * @apiSuccess {String} data.options.title  选项标题
 * @apiSuccess {String} data.options.description  描述
 * @apiSuccess {String} data.options.image  图片名称
@@ -392,7 +390,6 @@ router.post('/delete', async (ctx, next) => {
 * @apiParam {Object[]} [options]  选项列表
 * @apiParam {Number} options.[id]  选项数据ID,传递ID做更新操作，不传值则为创建新选项操作
 * @apiParam {Number} options.sequence  选项排序
-* @apiParam {Number} options.type  选项类型 1-图文类型 2-文字类型
 * @apiParam {String} options.title  选项标题
 * @apiParam {String} [options.description]  描述
 * @apiParam {String} [options.image]  图片名称
@@ -465,7 +462,7 @@ router.put('/:id', async (ctx, next) => {
 	const options = data.options || [];
 	for (let option of options) {
 		const optionData = { questionnaireId: questionnaire.id, timestamp };
-		[ 'id', 'sequence', 'type', 'title', 'description', 'image', 'video' ].map(key => {
+		[ 'id', 'sequence', 'title', 'description', 'image', 'video' ].map(key => {
 			if (option[key]) {
 				optionData[key] = option[key];
 			}

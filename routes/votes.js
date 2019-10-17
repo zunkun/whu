@@ -328,7 +328,7 @@ router.get('/participate', async (ctx, next) => {
 		where: { id: { [Op.in]: questionnaireIds } },
 		limit,
 		offset,
-		attributes: [ 'id', 'title', 'description', 'onoff', 'userId', 'userName', 'mobile', 'createdAt', 'startTime', 'endTime', 'depts', 'top' ],
+		attributes: [ 'id', 'title', 'description', 'onoff', 'userId', 'userName', 'mobile', 'createdAt', 'startTime', 'endTime', 'depts', 'top', 'specialUsers' ],
 		order: [ [ 'createdAt', 'DESC' ] ]
 	});
 	ctx.body = ResService.success(res);

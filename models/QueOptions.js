@@ -10,11 +10,6 @@ QueOptions.init({
 		type: DataTypes.INTEGER,
 		comment: '选项排序'
 	},
-	type: {
-		type: DataTypes.INTEGER,
-		comment: '选项类型 1-图文类型 2-文字类型',
-		defaultValue: 1
-	},
 	title: {
 		type: DataTypes.STRING,
 		comment: '选项标题'
