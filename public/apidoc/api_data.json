@@ -1739,6 +1739,13 @@
           },
           {
             "group": "Parameter",
+            "type": "Number",
+            "optional": true,
+            "field": "status",
+            "description": "<p>状态，0-未开始 1-进行中 2-已结束</p>"
+          },
+          {
+            "group": "Parameter",
             "type": "String",
             "optional": true,
             "field": "userName",
@@ -1854,6 +1861,20 @@
             "optional": false,
             "field": "data.rows.onoff",
             "description": "<p>上架下架 0-上架下架未设置 1-已上架 2-已下架</p>"
+          },
+          {
+            "group": "Success 200",
+            "type": "String",
+            "optional": false,
+            "field": "data.rows.currentTime",
+            "description": "<p>访问服务器接口的时间记录</p>"
+          },
+          {
+            "group": "Success 200",
+            "type": "String",
+            "optional": false,
+            "field": "data.rows.status",
+            "description": "<p>状态，0-未开始 1-进行中 2-已结束， 请注意只有当 onoff=1 表示上架状态当前值才有意义</p>"
           },
           {
             "group": "Success 200",
@@ -2056,7 +2077,7 @@
     "title": "我可以参与的投票问卷列表",
     "name": "questionnaires_ques",
     "group": "投票问卷管理",
-    "description": "<p>查询我可以参与的投票问卷列表</p>",
+    "description": "<p>查询我可以参与的投票问卷列表，本接口查询都是上线的投票问卷</p>",
     "header": {
       "fields": {
         "Header": [
@@ -2092,7 +2113,7 @@
             "type": "Number",
             "optional": true,
             "field": "status",
-            "description": "<p>状态，1-进行中 2-已结束,默认为1</p>"
+            "description": "<p>状态，0-未开始 1-进行中 2-已结束,默认为1</p>"
           }
         ]
       }
