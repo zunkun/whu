@@ -34,7 +34,7 @@ Votes.init({
 		comment: '投票时间'
 	},
 	checkedIds: {
-		type: DataTypes.STRING,
+		type: DataTypes.ARRAY(DataTypes.INTEGER),
 		comment: '投票人选择选项表ID，参看 Options表'
 	},
 	comment: {

@@ -160,7 +160,7 @@ router.get('/ques', async (ctx, next) => {
 	const deptStaffs = await DeptStaffs.findAll({ where: { userId: user.userId } });
 	for (let deptStaff of deptStaffs) {
 		let dept = await DingDepts.findOne({ where: { deptId: deptStaff.deptId } });
-		deptIds = deptIds.concat(dept.deptPaths.split('|'));
+		deptIds = deptIds.concat(dept.deptPaths);
 	}
 
 	deptIds = Array.from(new Set(deptIds));

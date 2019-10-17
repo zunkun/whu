@@ -69,9 +69,9 @@ router.post('/', async (ctx, next) => {
 						return Promise.reject('不在投票区间');
 					}
 					if (que.selectionNum === 1) {
-						voteData.checkedIds = data.checkedIds[0];
+						voteData.checkedIds = [ data.checkedIds[0] ];
 					} else {
-						voteData.checkedIds = data.checkedIds.join('|');
+						voteData.checkedIds = data.checkedIds;
 					}
 					return Votes.create(voteData);
 				});
@@ -223,7 +223,7 @@ router.get('/options', async (ctx, next) => {
 	let personCount = await Votes.count({ where: { questionnaireId } }); // 总投票人数
 	let optionRes = [];
 	for (let option of options) {
-		let voteDatas = await Votes.findAndCountAll({	where: { questionnaireId, checkedIds: { [Op.regexp]: `${option.id}||${option.id}|` } } });
+		let voteDatas = await Votes.findAndCountAll({	where: { questionnaireId, checkedIds: { [Op.contains]: [ option.id ] } } });
 		console.log({ voteDatas });
 		ticketCount += voteDatas.count;
 		optionRes.push({
