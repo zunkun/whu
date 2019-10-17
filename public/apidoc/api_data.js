@@ -1598,6 +1598,20 @@ define({ "api": [
           },
           {
             "group": "Success 200",
+            "type": "Date",
+            "optional": false,
+            "field": "data.currentTime",
+            "description": "<p>查询时的时间记录</p>"
+          },
+          {
+            "group": "Success 200",
+            "type": "String",
+            "optional": false,
+            "field": "data.status",
+            "description": "<p>状态，0-未开始 1-进行中 2-已结束， 请注意只有当 onoff=1 表示上架状态当前值才有意义</p>"
+          },
+          {
+            "group": "Success 200",
             "type": "Object[]",
             "optional": false,
             "field": "data.options",
@@ -1864,7 +1878,7 @@ define({ "api": [
           },
           {
             "group": "Success 200",
-            "type": "String",
+            "type": "Date",
             "optional": false,
             "field": "data.rows.currentTime",
             "description": "<p>访问服务器接口的时间记录</p>"
