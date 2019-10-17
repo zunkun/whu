@@ -146,7 +146,7 @@ router.get('/ques', async (ctx, next) => {
 	}
 
 	let time = new Date();
-	const where = {};
+	const where = { onoff: 1 };
 	// 进行中
 	if (status === 1) {
 		where.startTime = { [Op.lte]: time };

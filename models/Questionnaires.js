@@ -86,7 +86,7 @@ Questionnaires.init({
 	},
 	top: {
 		type: DataTypes.BOOLEAN,
-		defaultValue: true,
+		defaultValue: false,
 		comment: '是否置顶'
 	},
 	timestamp: {
