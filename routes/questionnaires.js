@@ -21,6 +21,7 @@ router.prefix('/api/questionnaires');
 * @apiParam {Number} [page] 第几页，默认1
 * @apiParam {String} [title] 活动标题
 * @apiParam {Number} [onoff] 上架下架状态 0-上架下架未设置 1-已上架 2-已下架，不填写表示所有的
+* @apiParam {Number} [status] 状态，0-未开始 1-进行中 2-已结束
 * @apiParam {String} [userName] 发起人姓名
 * @apiParam {String} [mobile] 发起人手机号
 * @apiParam {String} [startDate] 开始日期,格式 2019-09-24,【已废弃】请使用 startTime
@@ -37,6 +38,8 @@ router.prefix('/api/questionnaires');
 * @apiSuccess {String} data.rows.startTime 开始时间
 * @apiSuccess {String} data.rows.endTime 结束时间
 * @apiSuccess {String} data.rows.onoff 上架下架 0-上架下架未设置 1-已上架 2-已下架
+* @apiSuccess {String} data.rows.currentTime 访问服务器接口的时间记录
+* @apiSuccess {String} data.rows.status 状态，0-未开始 1-进行中 2-已结束， 请注意只有当 onoff=1 表示上架状态当前值才有意义
 * @apiSuccess {String} data.rows.userId 发起人userId
 * @apiSuccess {String} data.rows.userName 发起人姓名
 * @apiSuccess {String} data.rows.mobile 发起人手机
@@ -58,12 +61,29 @@ router.get('/', async (ctx, next) => {
 	let limit = Number(query.limit) || 10;
 	let offset = (page - 1) * limit;
 	let where = {};
+	let currentTime = new Date();
 
 	[ 'title', 'userName', 'mobile' ].map(key => {
 		if (query[key]) where[key] = { [Op.like]: `%${query[key]}%` };
 	});
 	if (query.onoff || query.onoff === 0 || query.onoff === '0') {
 		where.onoff = Number(query.onoff);
+	}
+	if (query.status || query.status === 0 || query.status === '0') {
+		let status = Number(query.status);
+
+		if (status === 0) {
+			where.startTime = { [Op.gt]: currentTime };
+		}
+
+		if (status === 1) {
+			where.startTime = { [Op.lte]: currentTime };
+			where.endTime = { [Op.gte]: currentTime };
+		}
+		// 已结束
+		if (status === 2) {
+			where.endTime = { [Op.lt]: currentTime };
+		}
 	}
 
 	if (query.startDate) {
@@ -95,6 +115,20 @@ router.get('/', async (ctx, next) => {
 		offset,
 		order: [ [ 'top', 'DESC' ], [ 'createdAt', 'DESC' ] ]
 	});
+
+	for (let que of res.rows) {
+		que = que.toJSON();
+		que.currentTime = currentTime;
+		let status;
+		if (currentTime > que.endTime) {
+			status = 2;
+		} else if (currentTime >= que.startTime) {
+			status = 1;
+		} else {
+			status = 0;
+		}
+		que.status = status;
+	}
 	ctx.body = ResService.success(res);
 	await next();
 });
@@ -103,11 +137,11 @@ router.get('/', async (ctx, next) => {
 * @api {get} /api/questionnaires/ques?limit=&page=&status= 我可以参与的投票问卷列表
 * @apiName questionnaires-ques
 * @apiGroup 投票问卷管理
-* @apiDescription 查询我可以参与的投票问卷列表
+* @apiDescription 查询我可以参与的投票问卷列表，本接口查询都是上线的投票问卷
 * @apiHeader {String} authorization 登录token
 * @apiParam {Number} [limit] 分页条数，默认10
 * @apiParam {Number} [page] 第几页，默认1
-* @apiParam {Number} [status] 状态，1-进行中 2-已结束,默认为1
+* @apiParam {Number} [status] 状态，0-未开始 1-进行中 2-已结束,默认为1
 * @apiSuccess {Number} errcode 成功为0
 * @apiSuccess {Object} data 投票问卷列表
 * @apiSuccess {Number} data.count 投票问卷总数
@@ -145,16 +179,19 @@ router.get('/ques', async (ctx, next) => {
 		ctx.body = ResService.fail('参数不正确');
 	}
 
-	let time = new Date();
+	let currentTime = new Date();
 	const where = { onoff: 1 };
+	if (status === 0) {
+		where.startTime = { [Op.gt]: currentTime };
+	}
 	// 进行中
 	if (status === 1) {
-		where.startTime = { [Op.lte]: time };
-		where.endTime = { [Op.gte]: time };
+		where.startTime = { [Op.lte]: currentTime };
+		where.endTime = { [Op.gte]: currentTime };
 	}
 	// 已结束
 	if (status === 2) {
-		where.endTime = { [Op.lt]: time };
+		where.endTime = { [Op.lt]: currentTime };
 	}
 	let deptIds = [];
 	const deptStaffs = await DeptStaffs.findAll({ where: { userId: user.userId } });
