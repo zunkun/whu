@@ -807,6 +807,20 @@
           },
           {
             "group": "Success 200",
+            "type": "Number[]",
+            "optional": false,
+            "field": "deptIds",
+            "description": "<p>参与人范围所在部门ID列表，例如[1,2,3], 不传该值则为所有部门人员都可以参与</p>"
+          },
+          {
+            "group": "Success 200",
+            "type": "Number[]",
+            "optional": false,
+            "field": "specialUserIds",
+            "description": "<p>特别选择参与人员userId表，例如 [1, 2, 3]，【注意】此参与人员是专指钉钉单独选择人员参与投票信息</p>"
+          },
+          {
+            "group": "Success 200",
             "type": "Object[]",
             "optional": false,
             "field": "data.rows.depts",
@@ -825,6 +839,27 @@
             "optional": false,
             "field": "data.rows.depts.deptName",
             "description": "<p>部门名称</p>"
+          },
+          {
+            "group": "Success 200",
+            "type": "Object[]",
+            "optional": false,
+            "field": "data.rows.specialUsers",
+            "description": "<p>特殊选择参与人员</p>"
+          },
+          {
+            "group": "Success 200",
+            "type": "String",
+            "optional": false,
+            "field": "data.rows.specialUsers.userId",
+            "description": "<p>特殊选择参与人员userId</p>"
+          },
+          {
+            "group": "Success 200",
+            "type": "String",
+            "optional": false,
+            "field": "data.rows.specialUsers.userName",
+            "description": "<p>特殊选择参与人员userName</p>"
           }
         ]
       }
@@ -990,13 +1025,6 @@
           },
           {
             "group": "Parameter",
-            "type": "Number",
-            "optional": false,
-            "field": "options.type",
-            "description": "<p>选项类型 1-图文类型 2-文字类型</p>"
-          },
-          {
-            "group": "Parameter",
             "type": "String",
             "optional": false,
             "field": "options.title",
@@ -1126,21 +1154,7 @@
             "type": "Number",
             "optional": false,
             "field": "options.sequence",
-            "description": "<p>选项排序 例如1,2,3</p>"
-          },
-          {
-            "group": "Parameter",
-            "type": "Number",
-            "optional": false,
-            "field": "options.type",
-            "description": "<p>选项类型 1-图文类型 2-文字类型</p>"
-          },
-          {
-            "group": "Parameter",
-            "type": "String",
-            "optional": false,
-            "field": "options.title",
-            "description": "<p>'选项标题'</p>"
+            "description": "<p>选项排序 例如1,2,3 ]* @apiParam {String} options.title '选项标题'</p>"
           },
           {
             "group": "Parameter",
@@ -1521,6 +1535,20 @@
           },
           {
             "group": "Success 200",
+            "type": "Number[]",
+            "optional": false,
+            "field": "deptIds",
+            "description": "<p>参与人范围所在部门ID列表，例如[1,2,3], 不传该值则为所有部门人员都可以参与</p>"
+          },
+          {
+            "group": "Success 200",
+            "type": "Number[]",
+            "optional": false,
+            "field": "specialUserIds",
+            "description": "<p>特别选择参与人员userId表，例如 [1, 2, 3]，【注意】此参与人员是专指钉钉单独选择人员参与投票信息</p>"
+          },
+          {
+            "group": "Success 200",
             "type": "Object[]",
             "optional": false,
             "field": "data.depts",
@@ -1588,13 +1616,6 @@
             "optional": false,
             "field": "data.options.sequence",
             "description": "<p>选项排序</p>"
-          },
-          {
-            "group": "Success 200",
-            "type": "Number",
-            "optional": false,
-            "field": "data.options.type",
-            "description": "<p>选项类型 1-图文类型 2-文字类型</p>"
           },
           {
             "group": "Success 200",
@@ -1854,6 +1875,20 @@
             "optional": false,
             "field": "data.rows.createdAt",
             "description": "<p>创建时间</p>"
+          },
+          {
+            "group": "Success 200",
+            "type": "Number[]",
+            "optional": false,
+            "field": "deptIds",
+            "description": "<p>参与人范围所在部门ID列表，例如[1,2,3], 不传该值则为所有部门人员都可以参与</p>"
+          },
+          {
+            "group": "Success 200",
+            "type": "Number[]",
+            "optional": false,
+            "field": "specialUserIds",
+            "description": "<p>特别选择参与人员userId表，例如 [1, 2, 3]，【注意】此参与人员是专指钉钉单独选择人员参与投票信息</p>"
           },
           {
             "group": "Success 200",
@@ -2155,6 +2190,20 @@
             "optional": false,
             "field": "data.rows.createdAt",
             "description": "<p>创建时间</p>"
+          },
+          {
+            "group": "Success 200",
+            "type": "Number[]",
+            "optional": false,
+            "field": "deptIds",
+            "description": "<p>参与人范围所在部门ID列表，例如[1,2,3], 不传该值则为所有部门人员都可以参与</p>"
+          },
+          {
+            "group": "Success 200",
+            "type": "Number[]",
+            "optional": false,
+            "field": "specialUserIds",
+            "description": "<p>特别选择参与人员userId表，例如 [1, 2, 3]，【注意】此参与人员是专指钉钉单独选择人员参与投票信息</p>"
           },
           {
             "group": "Success 200",

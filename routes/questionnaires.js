@@ -41,6 +41,8 @@ router.prefix('/api/questionnaires');
 * @apiSuccess {String} data.rows.userName 发起人姓名
 * @apiSuccess {String} data.rows.mobile 发起人手机
 * @apiSuccess {String} data.rows.createdAt  创建时间
+* @apiSuccess {Number[]} deptIds 参与人范围所在部门ID列表，例如[1,2,3], 不传该值则为所有部门人员都可以参与
+* @apiSuccess {Number[]} specialUserIds 特别选择参与人员userId表，例如 [1, 2, 3]，【注意】此参与人员是专指钉钉单独选择人员参与投票信息
 * @apiSuccess {Object[]} data.rows.depts  投票范围
 * @apiSuccess {String} data.rows.depts.deptId  部门id
 * @apiSuccess {String} data.rows.depts.deptName 部门名称
@@ -91,7 +93,6 @@ router.get('/', async (ctx, next) => {
 		where,
 		limit,
 		offset,
-		attributes: [ 'id', 'title', 'description', 'userId', 'userName', 'mobile', 'createdAt', 'startTime', 'endTime', 'depts', 'onoff', 'specialUsers' ],
 		order: [ [ 'top', 'DESC' ], [ 'createdAt', 'DESC' ] ]
 	});
 	ctx.body = ResService.success(res);
@@ -121,6 +122,8 @@ router.get('/', async (ctx, next) => {
 * @apiSuccess {String} data.rows.userName 发起人姓名
 * @apiSuccess {String} data.rows.mobile 发起人手机
 * @apiSuccess {String} data.rows.createdAt  创建时间
+* @apiSuccess {Number[]} deptIds 参与人范围所在部门ID列表，例如[1,2,3], 不传该值则为所有部门人员都可以参与
+* @apiSuccess {Number[]} specialUserIds 特别选择参与人员userId表，例如 [1, 2, 3]，【注意】此参与人员是专指钉钉单独选择人员参与投票信息
 * @apiSuccess {Object[]} data.rows.depts  投票范围
 * @apiSuccess {String} data.rows.depts.deptId  部门id
 * @apiSuccess {String} data.rows.depts.deptName 部门名称
@@ -169,7 +172,6 @@ router.get('/ques', async (ctx, next) => {
 		where,
 		limit,
 		offset,
-		attributes: [ 'id', 'top', 'title', 'description', 'onoff', 'userId', 'userName', 'mobile', 'createdAt', 'startTime', 'endTime', 'depts', 'specialUsers' ],
 		order: [ [ 'top', 'DESC' ], [ 'createdAt', 'DESC' ] ]
 	});
 	ctx.body = ResService.success(res);
@@ -318,6 +320,8 @@ router.post('/', async (ctx, next) => {
 * @apiSuccess {Boolean} data.anonymous  是否匿名投票
 * @apiSuccess {Boolean} data.realTimeVisiable  实时结果是否对用户可视
 * @apiSuccess {Number} data.selectionNum  单选多选 1-单选 2-多选
+* @apiSuccess {Number[]} deptIds 参与人范围所在部门ID列表，例如[1,2,3], 不传该值则为所有部门人员都可以参与
+* @apiSuccess {Number[]} specialUserIds 特别选择参与人员userId表，例如 [1, 2, 3]，【注意】此参与人员是专指钉钉单独选择人员参与投票信息
 * @apiSuccess {Object[]} data.depts  投票范围部门信息
 * @apiSuccess {String} data.depts.deptId  部门id
 * @apiSuccess {String} data.depts.deptName 部门名称

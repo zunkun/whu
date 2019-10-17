@@ -302,9 +302,14 @@ router.get('/commentsOut', async (ctx, next) => {
 * @apiSuccess {String} data.rows.userName 发起人姓名
 * @apiSuccess {String} data.rows.mobile 发起人手机
 * @apiSuccess {String} data.rows.createdAt  创建时间
+* @apiSuccess {Number[]} deptIds 参与人范围所在部门ID列表，例如[1,2,3], 不传该值则为所有部门人员都可以参与
+* @apiSuccess {Number[]} specialUserIds 特别选择参与人员userId表，例如 [1, 2, 3]，【注意】此参与人员是专指钉钉单独选择人员参与投票信息
 * @apiSuccess {Object[]} data.rows.depts  投票范围
 * @apiSuccess {String} data.rows.depts.deptId  部门id
 * @apiSuccess {String} data.rows.depts.deptName 部门名称
+* @apiSuccess {Object[]} data.rows.specialUsers  特殊选择参与人员
+* @apiSuccess {String} data.rows.specialUsers.userId  特殊选择参与人员userId
+* @apiSuccess {String} data.rows.specialUsers.userName  特殊选择参与人员userName
 * @apiError {Number} errcode 失败不为0
 * @apiError {Number} errmsg 错误消息
 */
@@ -328,7 +333,6 @@ router.get('/participate', async (ctx, next) => {
 		where: { id: { [Op.in]: questionnaireIds } },
 		limit,
 		offset,
-		attributes: [ 'id', 'title', 'description', 'onoff', 'userId', 'userName', 'mobile', 'createdAt', 'startTime', 'endTime', 'depts', 'top', 'specialUsers' ],
 		order: [ [ 'createdAt', 'DESC' ] ]
 	});
 	ctx.body = ResService.success(res);
