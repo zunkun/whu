@@ -6,6 +6,7 @@ const Questionnaires = require('../models/Questionnaires');
 const QueOptions = require('../models/QueOptions');
 const DingDepts = require('../models/DingDepts');
 const DeptStaffs = require('../models/DeptStaffs');
+const Votes = require('../models/Votes');
 const jwt = require('jsonwebtoken');
 const deptStaffService = require('../services/deptStaffService');
 const config = require('../config');
@@ -33,6 +34,7 @@ router.prefix('/api/questionnaires');
 * @apiSuccess {Number} data.count 投票问卷总数
 * @apiSuccess {Object[]} data.rows 当前页投票问卷列表
 * @apiSuccess {String} data.rows.title 投票问卷活动标题
+* @apiSuccess {Number} data.rows.voteCount 当前已投票人数
 * @apiSuccess {Boolean} data.rows.top 是否置顶， true置顶 false不置顶
 * @apiSuccess {String} data.rows.description 描述
 * @apiSuccess {String} data.rows.startTime 开始时间
@@ -109,15 +111,16 @@ router.get('/', async (ctx, next) => {
 		if (!where.endTime) where.endTime = {};
 		where.endTime[Op.gte] = time;
 	}
-	const res = await Questionnaires.findAndCountAll({
+	const ques = await Questionnaires.findAndCountAll({
 		where,
 		limit,
 		offset,
 		order: [ [ 'top', 'DESC' ], [ 'createdAt', 'DESC' ] ]
 	});
-
-	for (let que of res.rows) {
+	const res = { count: ques.count, rows: [] };
+	for (let que of ques.rows) {
 		que = que.toJSON();
+		que.voteCount = await Votes.count({ where: { questionnaireId: que.id } });
 		que.currentTime = currentTime;
 		let status;
 		if (currentTime > que.endTime) {
@@ -128,6 +131,7 @@ router.get('/', async (ctx, next) => {
 			status = 0;
 		}
 		que.status = status;
+		res.rows.push(que);
 	}
 	ctx.body = ResService.success(res);
 	await next();
@@ -147,6 +151,7 @@ router.get('/', async (ctx, next) => {
 * @apiSuccess {Number} data.count 投票问卷总数
 * @apiSuccess {Object[]} data.rows 当前页投票问卷列表
 * @apiSuccess {String} data.rows.title 投票问卷活动标题
+* @apiSuccess {Number} data.rows.voteCount 当前投票人数
 * @apiSuccess {Boolean} data.rows.top 是否置顶， true置顶 false不置顶
 * @apiSuccess {String} data.rows.description 描述
 * @apiSuccess {String} data.rows.startTime 开始时间
@@ -205,12 +210,18 @@ router.get('/ques', async (ctx, next) => {
 	where[Op.or].push({ deptIds: { [Op.overlap]: deptIds } });
 	where[Op.or].push({ specialUserIds: { [Op.contains]: [ user.userId ] } });
 
-	const res = await Questionnaires.findAndCountAll({
+	const ques = await Questionnaires.findAndCountAll({
 		where,
 		limit,
 		offset,
 		order: [ [ 'top', 'DESC' ], [ 'createdAt', 'DESC' ] ]
 	});
+	const res = { count: ques.count, rows: [] };
+	for (let que of ques.rows) {
+		que = que.toJSON();
+		que.voteCount = await Votes.count({ where: { questionnaireId: que.id } });
+		res.rows.push(que);
+	}
 	ctx.body = ResService.success(res);
 });
 
@@ -225,10 +236,10 @@ router.get('/ques', async (ctx, next) => {
 * @apiParam {Date} endTime 截止时间 格式 2019-08-24 08:00:00
 * @apiParam {Object[]} options 问卷选项详细信息
 * @apiParam {Number} options.sequence 选项排序 例如1,2,3
-]\* @apiParam {String} options.title '选项标题'
-* @apiParam {String} options.[description] '描述'
-* @apiParam {String} options.[image] '图片名称'
-* @apiParam {String} options.[video] '视屏名称'
+* @apiParam {String} options.title 选项标题
+* @apiParam {String} options.[description] 描述
+* @apiParam {String} options.[image] 图片名称
+* @apiParam {String} options.[video] 视屏名称
 * @apiParam {String} [description] 描述
 * @apiParam {String} [video] 视屏名称
 * @apiParam {Boolean} [commentAllowed] 是否允许评论,默认为 true
@@ -342,6 +353,7 @@ router.post('/', async (ctx, next) => {
 * @apiSuccess {Number} errcode 成功为0
 * @apiSuccess {Object} data 投票问卷信息
 * @apiSuccess {Number} data.id 投票问卷活动ID
+* @apiSuccess {Number} data.voteCount 当前投票人数
 * @apiSuccess {Boolean} data.top 是否置顶， true置顶 false不置顶
 * @apiSuccess {String} data.title 投票问卷活动标题
 * @apiSuccess {String} data.video 视屏名称
@@ -395,6 +407,7 @@ router.get('/:id', async (ctx, next) => {
 	}
 	que.status = status;
 	que.options = await QueOptions.findAll({ where: { questionnaireId: que.id, timestamp: que.timestamp } });
+	que.voteCount = await Votes.count({ where: { questionnaireId: que.id } });
 	ctx.body = ResService.success(que);
 	await next();
 });

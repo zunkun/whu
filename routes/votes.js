@@ -165,14 +165,9 @@ router.get('/comments', async (ctx, next) => {
 	const queryKeys = new Set(Object.keys(query));
 	if (queryKeys.has('status')) where.statsu = Number(query.status);
 
-	return Votes.findAndCountAll({ where, limit, offset }).then(votes => {
-		ctx.body = ResService.success(votes);
-		next();
-	}).catch(error => {
-		console.error('获取评论列表失败', error);
-		ctx.body = ResService.fail('获取评论列表失败');
-		next();
-	});
+	const votes = Votes.findAndCountAll({ where, limit, offset });
+	ctx.body = ResService.success(votes);
+	await next();
 });
 
 /**
@@ -224,7 +219,6 @@ router.get('/options', async (ctx, next) => {
 	let optionRes = [];
 	for (let option of options) {
 		let voteDatas = await Votes.findAndCountAll({	where: { questionnaireId, checkedIds: { [Op.contains]: [ option.id ] } } });
-		console.log({ voteDatas });
 		ticketCount += voteDatas.count;
 		optionRes.push({
 			option,
@@ -294,10 +288,13 @@ router.get('/commentsOut', async (ctx, next) => {
 * @apiSuccess {Number} data.count 投票问卷总数
 * @apiSuccess {Object[]} data.rows 当前页投票问卷列表
 * @apiSuccess {String} data.rows.title 投票问卷活动标题
+* @apiSuccess {Number} data.rows.voteCount 当前已投票人数
 * @apiSuccess {String} data.rows.description 描述
 * @apiSuccess {String} data.rows.startTime 开始时间
 * @apiSuccess {String} data.rows.endTime 结束时间
 * @apiSuccess {String} data.rows.onoff 上架下架 0-上架下架未设置 1-已上架 2-已下架
+* @apiSuccess {Date} data.rows.currentTime 访问服务器接口的时间记录
+* @apiSuccess {String} data.rows.status 状态，0-未开始 1-进行中 2-已结束， 请注意只有当 onoff=1 表示上架状态当前值才有意义
 * @apiSuccess {String} data.rows.userId 发起人userId
 * @apiSuccess {String} data.rows.userName 发起人姓名
 * @apiSuccess {String} data.rows.mobile 发起人手机
@@ -319,7 +316,6 @@ router.get('/participate', async (ctx, next) => {
 	let page = Number(query.page) || 1;
 	let limit = Number(query.limit) || 10;
 	let offset = (page - 1) * limit;
-
 	const votes = await Votes.findAll({
 		attributes: [ 'id', 'questionnaireId' ],
 		where: { userId: user.userId }
@@ -329,12 +325,30 @@ router.get('/participate', async (ctx, next) => {
 		questionnaireIds.push(vote.questionnaireId);
 	}
 
-	const res = await Questionnaires.findAndCountAll({
-		where: { id: { [Op.in]: questionnaireIds } },
+	const where = { id: { [Op.in]: questionnaireIds } };
+	const ques = await Questionnaires.findAndCountAll({
+		where,
 		limit,
 		offset,
-		order: [ [ 'createdAt', 'DESC' ] ]
+		order: [ [ 'top', 'DESC' ], [ 'createdAt', 'DESC' ] ]
 	});
+	const currentTime = new Date();
+	const res = { count: ques.count, rows: [] };
+	for (let que of ques.rows) {
+		que = que.toJSON();
+		que.voteCount = await Votes.count({ where: { questionnaireId: que.id } });
+		que.currentTime = currentTime;
+		let status;
+		if (currentTime > que.endTime) {
+			status = 2;
+		} else if (currentTime >= que.startTime) {
+			status = 1;
+		} else {
+			status = 0;
+		}
+		que.status = status;
+		res.rows.push(que);
+	}
 	ctx.body = ResService.success(res);
 	await next();
 });
