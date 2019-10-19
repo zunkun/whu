@@ -163,7 +163,7 @@ router.get('/comments', async (ctx, next) => {
 	const where = { questionnaireId: query.questionnaireId, comment: { [Op.ne]: null } };
 
 	const queryKeys = new Set(Object.keys(query));
-	if (queryKeys.has('status')) where.statsu = Number(query.status);
+	if (queryKeys.has('status')) where.status = Number(query.status);
 
 	const votes = await Votes.findAndCountAll({ where, limit, offset });
 	ctx.body = ResService.success(votes);
