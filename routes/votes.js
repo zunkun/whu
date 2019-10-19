@@ -165,7 +165,7 @@ router.get('/comments', async (ctx, next) => {
 	const queryKeys = new Set(Object.keys(query));
 	if (queryKeys.has('status')) where.statsu = Number(query.status);
 
-	const votes = Votes.findAndCountAll({ where, limit, offset });
+	const votes = await Votes.findAndCountAll({ where, limit, offset });
 	ctx.body = ResService.success(votes);
 	await next();
 });
@@ -232,12 +232,11 @@ router.get('/options', async (ctx, next) => {
 		let percentCount = 0;
 		for (let i = 0, len = optionRes.length; i < len - 2; i++) {
 			let item = optionRes[i];
-			item.percent = Number((item.count / ticketCount).toFixed(3));
+			optionRes[i].percent = Number((item.count / ticketCount).toFixed(3));
 			percentCount += item.percent;
 		}
 		optionRes[optionRes.length - 1].percent = 1 - percentCount;
 	}
-	console.log({ ticketCount, personCount });
 	ctx.body = ResService.success({
 		ticketCount,
 		personCount,
