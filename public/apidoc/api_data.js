@@ -1118,13 +1118,6 @@ define({ "api": [
             "group": "Parameter",
             "type": "Number",
             "optional": false,
-            "field": "options.[id]",
-            "description": "<p>选项数据ID,传递ID做更新操作，不传值则为创建新选项操作</p>"
-          },
-          {
-            "group": "Parameter",
-            "type": "Number",
-            "optional": false,
             "field": "options.sequence",
             "description": "<p>选项排序</p>"
           },

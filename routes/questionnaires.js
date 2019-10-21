@@ -455,7 +455,6 @@ router.post('/delete', async (ctx, next) => {
 * @apiParam {Number[]} [deptIds] 参与人范围所在部门ID列表，例如[1,2,3], 不传该值则为所有部门人员都可以参与
 * @apiParam {Number[]} [specialUserIds] 特别选择参与人员userId表，例如 [1, 2, 3]，【注意】此参与人员是专指钉钉单独选择人员参与投票信息
 * @apiParam {Object[]} [options]  选项列表
-* @apiParam {Number} options.[id]  选项数据ID,传递ID做更新操作，不传值则为创建新选项操作
 * @apiParam {Number} options.sequence  选项排序
 * @apiParam {String} options.title  选项标题
 * @apiParam {String} [options.description]  描述
