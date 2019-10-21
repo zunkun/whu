@@ -999,7 +999,7 @@ define({ "api": [
     "title": "修改投票问卷",
     "name": "questionnaire_modify",
     "group": "投票问卷管理",
-    "description": "<p>修改投票问卷</p>",
+    "description": "<p>修改投票问卷，注意如果系统中已有人投票，则不允许修改</p>",
     "header": {
       "fields": {
         "Header": [

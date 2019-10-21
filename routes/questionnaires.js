@@ -439,7 +439,7 @@ router.post('/delete', async (ctx, next) => {
 * @api {put} /api/questionnaires/:id 修改投票问卷
 * @apiName questionnaire-modify
 * @apiGroup 投票问卷管理
-* @apiDescription 修改投票问卷
+* @apiDescription 修改投票问卷，注意如果系统中已有人投票，则不允许修改
 * @apiHeader {String} authorization 登录token
 * @apiParam {Number} id 投票问卷id
 * @apiParam {String} [title] 活动标题
@@ -471,6 +471,11 @@ router.put('/:id', async (ctx, next) => {
 	let questionnaire = await Questionnaires.findOne({ where: { id: ctx.params.id } });
 	if (!questionnaire) {
 		ctx.body = ResService.fail('系统中没有该问卷投票');
+		return;
+	}
+	const vote = await Votes.findOne({ where: { questionnaireId: ctx.params.id } });
+	if (vote) {
+		ctx.body = ResService.fail('当前已有人进行投票，不允许更改投票信息');
 		return;
 	}
 	const timestamp = Date.now();
@@ -529,16 +534,12 @@ router.put('/:id', async (ctx, next) => {
 	const options = data.options || [];
 	for (let option of options) {
 		const optionData = { questionnaireId: questionnaire.id, timestamp };
-		[ 'id', 'sequence', 'title', 'description', 'image', 'video' ].map(key => {
+		[ 'sequence', 'title', 'description', 'image', 'video' ].map(key => {
 			if (option[key]) {
 				optionData[key] = option[key];
 			}
 		});
-		if (!option.id) {
-			await QueOptions.create(optionData);
-			continue;
-		}
-		await QueOptions.update(optionData, { where: { id: option.id } });
+		await QueOptions.create(optionData);
 	}
 	// 删除旧版本选项
 	await QueOptions.destroy({ where: { questionnaireId: ctx.params.id, timestamp: { [Op.ne]: timestamp } } });
