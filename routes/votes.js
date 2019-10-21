@@ -239,9 +239,10 @@ router.get('/options', async (ctx, next) => {
 
 	const options = await QueOptions.findAll({ where: { questionnaireId } });
 	let ticketCount = 0; // 总票数
-	let personCount = await Votes.count({ where: { questionnaireId } }); // 总投票人数
 	let optionRes = [];
+	let optionIds = [];
 	for (let option of options) {
+		optionIds.push(option.id);
 		let voteDatas = await Votes.findAndCountAll({	where: { questionnaireId, checkedIds: { [Op.contains]: [ option.id ] } } });
 		ticketCount += voteDatas.count;
 		optionRes.push({
@@ -261,6 +262,7 @@ router.get('/options', async (ctx, next) => {
 		}
 		optionRes[optionRes.length - 1].percent = 1 - percentCount;
 	}
+	let personCount = await Votes.count({ where: { questionnaireId, checkedIds: { [Op.overlap]: optionIds } } }); // 总投票人数,此处过滤掉已经删除的选项
 	ctx.body = ResService.success({
 		ticketCount,
 		personCount,
