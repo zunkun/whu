@@ -171,6 +171,30 @@ router.get('/comments', async (ctx, next) => {
 });
 
 /**
+* @api {post} /api/votes/commentStatus 设置评论状态
+* @apiName votes-set-comentStatus
+* @apiGroup 投票管理
+* @apiDescription 设置评论状态
+* @apiHeader {String} authorization 登录token
+* @apiParam {Number} voteId 投票ID
+* @apiParam {Number} status 状态 1-通过 2-不通过 3-删除
+* @apiSuccess {Number} errcode 成功为0
+* @apiSuccess {Object} data {}
+* @apiError {Number} errcode 失败不为0
+* @apiError {Number} errmsg 错误消息
+*/
+router.post('/commentStatus', async (ctx, next) => {
+	const { voteId, status } = ctx.request.body;
+	if (!voteId || !status) {
+		ctx.body = ResService.fail('参数错误');
+		return;
+	}
+	await Votes.update({ commentStatus: Number(status) }, { where: { id: voteId } });
+	ctx.body = ResService.success({});
+	await next();
+});
+
+/**
 * @api {get} /api/votes/options?questionnaireId= 投票结果统计
 * @apiName votes-options-results
 * @apiGroup 投票管理

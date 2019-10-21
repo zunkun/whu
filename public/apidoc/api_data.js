@@ -910,6 +910,90 @@ define({ "api": [
     "groupTitle": "投票管理"
   },
   {
+    "type": "post",
+    "url": "/api/votes/commentStatus",
+    "title": "设置评论状态",
+    "name": "votes_set_comentStatus",
+    "group": "投票管理",
+    "description": "<p>设置评论状态</p>",
+    "header": {
+      "fields": {
+        "Header": [
+          {
+            "group": "Header",
+            "type": "String",
+            "optional": false,
+            "field": "authorization",
+            "description": "<p>登录token</p>"
+          }
+        ]
+      }
+    },
+    "parameter": {
+      "fields": {
+        "Parameter": [
+          {
+            "group": "Parameter",
+            "type": "Number",
+            "optional": false,
+            "field": "voteId",
+            "description": "<p>投票ID</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "Number",
+            "optional": false,
+            "field": "status",
+            "description": "<p>状态 1-通过 2-不通过 3-删除</p>"
+          }
+        ]
+      }
+    },
+    "success": {
+      "fields": {
+        "Success 200": [
+          {
+            "group": "Success 200",
+            "type": "Number",
+            "optional": false,
+            "field": "errcode",
+            "description": "<p>成功为0</p>"
+          },
+          {
+            "group": "Success 200",
+            "type": "Object",
+            "optional": false,
+            "field": "data",
+            "description": "<p>{}</p>"
+          }
+        ]
+      }
+    },
+    "error": {
+      "fields": {
+        "Error 4xx": [
+          {
+            "group": "Error 4xx",
+            "type": "Number",
+            "optional": false,
+            "field": "errcode",
+            "description": "<p>失败不为0</p>"
+          },
+          {
+            "group": "Error 4xx",
+            "type": "Number",
+            "optional": false,
+            "field": "errmsg",
+            "description": "<p>错误消息</p>"
+          }
+        ]
+      }
+    },
+    "version": "0.0.0",
+    "filename": "routes/votes.js",
+    "groupTitle": "投票管理"
+  },
+  {
     "type": "put",
     "url": "/api/questionnaires/:id",
     "title": "修改投票问卷",
