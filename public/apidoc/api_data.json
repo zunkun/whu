@@ -48,7 +48,7 @@
             "type": "Number",
             "optional": true,
             "field": "status",
-            "description": "<p>状态 0-编辑中 10-进行中 20-已结束 30-已下架,不传则查询所有评论</p>"
+            "description": "<p>评论状态 0-已提交 1-通过 2-未通过 3-已删除</p>"
           }
         ]
       }

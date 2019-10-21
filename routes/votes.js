@@ -134,7 +134,7 @@ router.get('/info', async (ctx, next) => {
 * @apiParam {Number} questionnaireId 问卷活动ID
 * @apiParam {Number} [limit] 分页条数，默认10
 * @apiParam {Number} [page] 第几页，默认1
-* @apiParam {Number} [status] 状态 0-编辑中 10-进行中 20-已结束 30-已下架,不传则查询所有评论
+* @apiParam {Number} [status] 评论状态 0-已提交 1-通过 2-未通过 3-已删除
 * @apiSuccess {Object} data 返回数据
 * @apiSuccess {Number} data.count 总共评论条数
 * @apiSuccess {Object[]} data.rows 当前页评论列表
