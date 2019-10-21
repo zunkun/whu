@@ -439,7 +439,7 @@ router.post('/delete', async (ctx, next) => {
 * @api {put} /api/questionnaires/:id 修改投票问卷
 * @apiName questionnaire-modify
 * @apiGroup 投票问卷管理
-* @apiDescription 修改投票问卷，注意如果系统中已有人投票，则不允许修改
+* @apiDescription 修改投票问卷，注意如果系统中已有人投票，则不允许修改title,startTime,endTime, options等字段
 * @apiHeader {String} authorization 登录token
 * @apiParam {Number} id 投票问卷id
 * @apiParam {String} [title] 活动标题
@@ -473,10 +473,6 @@ router.put('/:id', async (ctx, next) => {
 		return;
 	}
 	const vote = await Votes.findOne({ where: { questionnaireId: ctx.params.id } });
-	if (vote) {
-		ctx.body = ResService.fail('当前已有人进行投票，不允许更改投票信息');
-		return;
-	}
 	const timestamp = Date.now();
 	const dataKeys = new Set(Object.keys(data));
 
@@ -527,21 +523,30 @@ router.put('/:id', async (ctx, next) => {
 			queData.depts = [ { deptId: 1, deptName: config.corpName } ];
 		}
 	}
-	await Questionnaires.update(queData, { where: { id: ctx.params.id } });
-
-	// 更新选项数据
-	const options = data.options || [];
-	for (let option of options) {
-		const optionData = { questionnaireId: questionnaire.id, timestamp };
-		[ 'sequence', 'title', 'description', 'image', 'video' ].map(key => {
-			if (option[key]) {
-				optionData[key] = option[key];
-			}
-		});
-		await QueOptions.create(optionData);
+	// 有投票不得更改投票标题，投票时间等信息
+	if (vote) {
+		delete queData.title;
+		delete queData.startTime;
+		delete queData.endTime;
+		delete queData.timestamp;
 	}
-	// 删除旧版本选项
-	await QueOptions.destroy({ where: { questionnaireId: ctx.params.id, timestamp: { [Op.ne]: timestamp } } });
+	await Questionnaires.update(queData, { where: { id: ctx.params.id } });
+	// 有投票不得更改和删除选项
+	if (!vote) {
+		// 更新选项数据
+		const options = data.options || [];
+		for (let option of options) {
+			const optionData = { questionnaireId: questionnaire.id, timestamp };
+			[ 'sequence', 'title', 'description', 'image', 'video' ].map(key => {
+				if (option[key]) {
+					optionData[key] = option[key];
+				}
+			});
+			await QueOptions.create(optionData);
+		}
+		// 删除旧版本选项
+		await QueOptions.destroy({ where: { questionnaireId: ctx.params.id, timestamp: { [Op.ne]: timestamp } } });
+	}
 	ctx.body = ResService.success({ id: ctx.params.id });
 });
 
