@@ -1,7 +1,6 @@
 const DingDepts = require('../models/DingDepts');
 const DingStaffs = require('../models/DingStaffs');
 const DeptStaffs = require('../models/DeptStaffs');
-const DingSyncs = require('../models/DingSyncs');
 
 const dingding = require('../core/dingding');
 const config = require('../config');
@@ -29,20 +28,10 @@ class StructureSchedule {
 	}
 
 	async sync () {
-		// let sync = await DingSyncs.findOne({ where: { date: this.date, status: 1 } });
-		// if (sync) {
-		// 	console.log('当日已经同步部门人员信息，不再同步');
-		// }
-		try {
-			await this.syncDepts();
-			await this.syncStaffs();
-			let endTime = Date.now();
-			console.log(`用时 ${(endTime - startTime) / 1000} s`);
-			await DingSyncs.upsert({ date: this.date, status: 1 }, { where: { date: this.date } });
-		} catch (error) {
-			console.log({ error });
-			await DingSyncs.upsert({ date: this.date, status: 2 }, { where: { date: this.date } });
-		}
+		await this.syncDepts();
+		await this.syncStaffs();
+		let endTime = Date.now();
+		console.log(`用时 ${(endTime - startTime) / 1000} s`);
 	}
 
 	async syncDepts () {
