@@ -7,8 +7,9 @@ const dingding = require('../core/dingding');
 const config = require('../config');
 const cron = require('node-cron');
 const moment = require('moment');
-const util = require('../core/util');
+let startTime = Date.now();
 
+let total = 0;
 class StructureSchedule {
 	constructor () {
 		this.date = moment().format('YYYY-MM-DD');
@@ -28,14 +29,15 @@ class StructureSchedule {
 	}
 
 	async sync () {
-		let sync = await DingSyncs.findOne({ where: { date: this.date, status: 1 } });
-		if (sync) {
-			console.log('当日已经同步部门人员信息，不再同步');
-		}
+		// let sync = await DingSyncs.findOne({ where: { date: this.date, status: 1 } });
+		// if (sync) {
+		// 	console.log('当日已经同步部门人员信息，不再同步');
+		// }
 		try {
 			await this.syncDepts();
 			await this.syncStaffs();
-
+			let endTime = Date.now();
+			console.log(`用时 ${(endTime - startTime) / 1000} s`);
 			await DingSyncs.upsert({ date: this.date, status: 1 }, { where: { date: this.date } });
 		} catch (error) {
 			console.log({ error });
@@ -102,22 +104,25 @@ class StructureSchedule {
 	}
 
 	async syncStaffs () {
-		let promiseArray = [];
-		for (let department of this.departments) {
-			let promise = this.syncDeptStaffs(department.id);
-			await util.wait(200);
-			promiseArray.push(promise);
+		for (let index = 0; index < this.departments.length; index++) {
+			let department = this.departments[index];
+			console.log(`【保存】 ${department.name} ${index + 1} 人员列表`);
+			await this.syncDeptStaffs(department.id, index + 1);
 		}
-		return Promise.all(promiseArray);
+		console.log(`总人数 ${total} 总用时  ${(Date.now() - startTime) / 1000} s`);
 	}
 
-	async syncDeptStaffs (deptId) {
-		console.log(`【开始】获取部门 ${deptId} ${this.deptMap.get(deptId).deptName} 人员列表`);
+	async syncDeptStaffs (deptId, index) {
+		let time = Date.now();
+		console.log(`当前时间 ${(time - startTime) / 1000} s`);
+		console.log(`【开始】${index} 获取部门 ${deptId} ${this.deptMap.get(deptId).deptName} 人员列表`);
 		if (!deptId) return Promise.resolve();
 
 		let userLists = await dingding.getDeptUsers(deptId);
-
-		console.log(`【开始】保存部门 ${deptId} ${this.deptMap.get(deptId).deptName} 人员列表`);
+		let total1 = total;
+		total = total + userLists.length;
+		console.log(`【保存】${index} 部门 ${deptId} ${this.deptMap.get(deptId).deptName} 人员列表`);
+		console.log(`部门 ${index}  人员数 ${userLists.length} 已处理 ${total1} 处理后 ${total}`);
 		try {
 			for (let user of userLists) {
 				let staffData = {

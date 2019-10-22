@@ -1,14 +1,7 @@
 module.exports = {
 	PORT: 3000,
-	mysql: {
-		host: '10.113.4.75',
-		port: 3306,
-		database: 'whu',
-		username: 'root',
-		password: '!Asbcd1234'
-	},
 	postgres: {
-		host: '10.113.4.75',
+		host: '10.113.6.11',
 		port: 5432,
 		database: 'whu',
 		username: 'whu',

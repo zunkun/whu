@@ -10,8 +10,8 @@ const postgres = new Sequelize(pgConfig.database, pgConfig.username, pgConfig.pa
 		min: 0,
 		acquire: 30000,
 		idle: 10000
-	}
-	// logging: false
+	},
+	logging: false
 });
 
 module.exports = postgres;

@@ -1,6 +1,5 @@
 module.exports = {
 	apps: [ {
-		name: 'vote_dev',
 		script: 'bin/www.js',
 		instances: 1,
 		autorestart: true,
@@ -10,9 +9,13 @@ module.exports = {
 			PORT: 3000,
 			name: 'vote_dev',
 			NODE_ENV: 'development'
+		},
+		env_production: {
+			PORT: 3000,
+			name: 'vote_pro',
+			NODE_ENV: 'production'
 		}
 	}, {
-		name: 'vote_sch_dev',
 		script: 'bin/schedule.js',
 		instances: 1,
 		autorestart: true,
@@ -22,6 +25,11 @@ module.exports = {
 			PORT: 3002,
 			name: 'vote_sch_dev',
 			NODE_ENV: 'development'
+		},
+		env_production: {
+			PORT: 3002,
+			name: 'vote_sch_pro',
+			NODE_ENV: 'production'
 		}
 	} ]
 };

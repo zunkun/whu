@@ -138,17 +138,17 @@ class Dingding {
 
 	async getUserLists (userLists = [], options, offset = 0) {
 		options.qs.offset = offset;
-		offset += 1;
 		let data = await rp(options);
-
 		if (data.errcode === 0) {
 			userLists = userLists.concat(data.userlist || []);
 			if (!data.hasMore) {
 				return userLists;
 			}
-			await util.wait(200);
+			await util.wait(40, `${options.qs.department_id}  ${offset} 获取人员等待中`);
+			offset = userLists.length - 1;
 			return this.getUserLists(userLists, options, offset);
 		} else {
+			console.log(data.errcode, data.errmsg);
 			return userLists;
 		}
 	}
