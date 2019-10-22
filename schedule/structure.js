@@ -74,7 +74,7 @@ class StructureSchedule {
 
 		console.log('【开始】保存部门列表');
 		for (let department of this.departments) {
-			await DingDepts.upsert({
+			DingDepts.upsert({
 				deptId: department.id,
 				deptName: department.name,
 				parentId: department.parentid,
@@ -134,14 +134,15 @@ class StructureSchedule {
 					email: user.email
 				};
 
-				await DingStaffs.upsert(staffData, { where: { userId: user.userid }, returning: true });
-				await DeptStaffs.upsert({
+				DingStaffs.upsert(staffData, { where: { userId: user.userid }, returning: true });
+				DeptStaffs.upsert({
 					userId: user.userid,
 					deptId,
 					userName: user.name,
 					deptName: this.deptMap.get(deptId).deptName || ''
 				}, { where: { deptId, userId: user.userid } });
 			}
+			return Promise.resolve();
 		} catch (error) {
 			return Promise.reject(error);
 		}

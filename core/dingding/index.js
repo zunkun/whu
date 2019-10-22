@@ -144,7 +144,7 @@ class Dingding {
 			if (!data.hasMore) {
 				return userLists;
 			}
-			await util.wait(40, `${options.qs.department_id}  ${offset} 获取人员等待中`);
+			await util.wait(20, `${options.qs.department_id}  ${offset} 获取人员等待中`);
 			offset = userLists.length - 1;
 			return this.getUserLists(userLists, options, offset);
 		} else {
