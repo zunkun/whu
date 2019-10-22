@@ -7,8 +7,14 @@ const bodyparser = require('koa-bodyparser');
 const logger = require('koa-logger');
 const jwt = require('koa-jwt');
 const fs = require('fs');
+const cors = require('@koa/cors');
 const path = require('path');
 const config = require('./config');
+
+app.use(cors({
+	'Access-Control-Allow-Origin': '*',
+	'Access-Control-Allow-Methods': 'GET,HEAD,PUT,POST,DELETE,PATCH,OPTIONS'
+}));
 
 app.use(bodyparser({
 	enableTypes: [ 'json', 'form', 'text' ]
@@ -17,7 +23,7 @@ app.use(json());
 app.use(logger());
 
 app.use(jwt({ secret: config.secret }).unless({
-	path: [ /^\/api\/auth/, /^\/api\/constants/, /^\/api\/files/, /^\/apidoc/ ]
+	path: [ /^\/api\/auth/, /^\/api\/constants/, /^\/api\/files/, /^\/apidoc/, /^\/vote_pc/, /^\/vote_mobile/ ]
 }));
 
 // 请求出错日志

@@ -1,4 +1,6 @@
 node_modules
 public/images/*.jpg
 public/files/upload/*.xlsx
+public/vote_pc/*
+public/vote_mobile/*
 package-lock.json

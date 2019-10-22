@@ -41,6 +41,7 @@
     "supertest": "^4.0.2"
   },
   "dependencies": {
+    "@koa/cors": "^3.0.0",
     "console-stamp": "^0.2.7",
     "jsonwebtoken": "^8.5.1",
     "koa": "^2.6.2",
