@@ -102,6 +102,10 @@ class Dingding {
 		}
 	}
 
+	/**
+	 * 获取部门详情
+	 * @param {Number} deptId deptId
+	 */
 	async getDeptInfo (deptId) {
 		let uri = `${config.dingBaseUri}/department/get`;
 		let data = await rp.get(uri, {
@@ -112,6 +116,27 @@ class Dingding {
 			json: true
 		});
 		return data;
+	}
+
+	/**
+	 * 获取部门父上级列表
+	 * @param {Number} deptId deptId
+	 */
+	async getDeptParentPath (deptId) {
+		// https://oapi.dingtalk.com/department/list_parent_depts_by_dept?access_token=ACCESS_TOKEN&id=ID
+
+		let uri = `${config.dingBaseUri}/department/list_parent_depts_by_dept`;
+		let data = await rp.get(uri, {
+			qs: {
+				id: deptId || 1,
+				access_token: await this.getAccessToken()
+			},
+			json: true
+		});
+		if (data.errcode === 0) {
+			return data.parentIds;
+		}
+		return [];
 	}
 
 	/**

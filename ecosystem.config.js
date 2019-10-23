@@ -4,6 +4,7 @@ module.exports = {
 		instances: 1,
 		autorestart: true,
 		watch: false,
+		time: true,
 		max_memory_restart: '2G',
 		env: {
 			PORT: 3000,
@@ -20,6 +21,7 @@ module.exports = {
 		instances: 1,
 		autorestart: true,
 		watch: false,
+		time: true,
 		max_memory_restart: '2G',
 		env: {
 			PORT: 3002,

@@ -6,7 +6,6 @@ const dingding = require('../core/dingding');
 const config = require('../config');
 const cron = require('node-cron');
 const moment = require('moment');
-let startTime = Date.now();
 
 let total = 0;
 class StructureSchedule {
@@ -15,13 +14,16 @@ class StructureSchedule {
 		this.deptMap = new Map();
 		this.departments = [];
 		this.dingdeptIdMap = new Map();
+		this.startTime = Date.now();
 		this.pathMap = new Map();
 	}
 
 	async start () {
+		this.startTime = Date.now();
 		await this.sync();
 		const task = cron.schedule(config.deptCron, async () => {
 			this.date = moment().format('YYYY-MM-DD');
+			this.startTime = Date.now();
 			await this.sync();
 		});
 		return task.start();
@@ -31,7 +33,7 @@ class StructureSchedule {
 		await this.syncDepts();
 		await this.syncStaffs();
 		let endTime = Date.now();
-		console.log(`用时 ${(endTime - startTime) / 1000} s`);
+		console.log(`开始时间 ${new Date(this.startTime)} 结束时间 ${new Date(endTime)} 用时 ${(endTime - this.startTime) / 1000} s`);
 	}
 
 	async syncDepts () {
@@ -98,12 +100,12 @@ class StructureSchedule {
 			console.log(`【保存】 ${department.name} ${index + 1} 人员列表`);
 			await this.syncDeptStaffs(department.id, index + 1);
 		}
-		console.log(`总人数 ${total} 总用时  ${(Date.now() - startTime) / 1000} s`);
+		console.log(`总人数 ${total} 总用时  ${(Date.now() - this.startTime) / 1000} s`);
 	}
 
 	async syncDeptStaffs (deptId, index) {
 		let time = Date.now();
-		console.log(`当前时间 ${(time - startTime) / 1000} s`);
+		console.log(`当前时间 ${(time - this.startTime) / 1000} s`);
 		console.log(`【开始】${index} 获取部门 ${deptId} ${this.deptMap.get(deptId).deptName} 人员列表`);
 		if (!deptId) return Promise.resolve();
 
