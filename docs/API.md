@@ -11,7 +11,7 @@
 
 1. 文件上传
 
-BaseUrl: ` http://alumnihome1893.whu.edu.cn/fs_upload`
+BaseUrl: ` http://alumnihome1893-1.whu.edu.cn/fs_upload`
 
 a. 图片上传  POST: `${BaseUrl}/api/files/image`, 只能上传 .jpg .png 格式图片
 
@@ -21,7 +21,7 @@ b. 上传视屏  POST: `${BaseUrl}/api/files/video`
 
 2. 文件访问
 
-BaseUrl: `http://alumnihome1893-1.whu.edu.cn/fs_download`
+BaseUrl: `http://alumnihome1893-1.whu.edu.cn/files`
 
 c. 访问图片 `${BaseUrl}/image/a.jpg`
 
