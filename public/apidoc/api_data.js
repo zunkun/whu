@@ -994,8 +994,8 @@ define({ "api": [
     "groupTitle": "投票管理"
   },
   {
-    "type": "put",
-    "url": "/api/questionnaires/:id",
+    "type": "POST",
+    "url": "/api/questionnaires/modify",
     "title": "修改投票问卷",
     "name": "questionnaire_modify",
     "group": "投票问卷管理",

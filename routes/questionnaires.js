@@ -436,7 +436,7 @@ router.post('/delete', async (ctx, next) => {
 });
 
 /**
-* @api {pust} /api/questionnaires/modify 修改投票问卷
+* @api {POST} /api/questionnaires/modify 修改投票问卷
 * @apiName questionnaire-modify
 * @apiGroup 投票问卷管理
 * @apiDescription 修改投票问卷，注意如果系统中已有人投票，则不允许修改title,startTime,endTime, options等字段
