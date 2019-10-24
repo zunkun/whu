@@ -257,10 +257,10 @@ router.get('/options', async (ctx, next) => {
 		let percentCount = 0;
 		for (let i = 0, len = optionRes.length; i < len - 2; i++) {
 			let item = optionRes[i];
-			optionRes[i].percent = Number((item.count / ticketCount).toFixed(3));
+			optionRes[i].percent = Number((item.count * 100 / ticketCount).toFixed(3));
 			percentCount += item.percent;
 		}
-		optionRes[optionRes.length - 1].percent = 1 - percentCount;
+		optionRes[optionRes.length - 1].percent = 100 - percentCount;
 	}
 	let personCount = await Votes.count({ where: { questionnaireId, checkedIds: { [Op.overlap]: optionIds } } }); // 总投票人数,此处过滤掉已经删除的选项
 	ctx.body = ResService.success({

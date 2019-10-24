@@ -123,7 +123,9 @@ router.get('/', async (ctx, next) => {
 		que.voteCount = await Votes.count({ where: { questionnaireId: que.id } });
 		que.currentTime = currentTime;
 		let status;
-		if (currentTime > que.endTime) {
+		if (que.onoff === 0) {
+			status = 0;
+		} else if (currentTime > que.endTime) {
 			status = 2;
 		} else if (currentTime >= que.startTime) {
 			status = 1;
