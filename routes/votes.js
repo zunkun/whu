@@ -255,9 +255,9 @@ router.get('/options', async (ctx, next) => {
 	// 計算百分比
 	if (ticketCount) {
 		let percentCount = 0;
-		for (let i = 0, len = optionRes.length; i < len - 2; i++) {
+		for (let i = 0, len = optionRes.length; i <= len - 2; i++) {
 			let item = optionRes[i];
-			optionRes[i].percent = Number((item.count * 100 / ticketCount).toFixed(3));
+			optionRes[i].percent = Number((item.count * 100 / ticketCount).toFixed(2));
 			percentCount += item.percent;
 		}
 		optionRes[optionRes.length - 1].percent = 100 - percentCount;
