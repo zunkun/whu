@@ -1,5 +1,7 @@
 const DingDepts = require('../models/DingDepts');
 const DingStaffs = require('../models/DingStaffs');
+const DeptStaffs = require('../models/DeptStaffs');
+const dingding = require('../core/dingding');
 const config = require('../config');
 class DeptStaffService {
 	/**
@@ -60,6 +62,48 @@ class DeptStaffService {
 			this.staffMap.set(userId, { userId, userName: staff.userName, mobile: staff.mobile });
 		}
 		return this.staffMap.get(userId);
+	}
+
+	/**
+	 * 设置钉钉获取用户数据到数据库
+	 * @param {String} userId userId
+	 * @param {Object} [user] 钉钉获取的user数据
+	 */
+	async upsertStaff (userId, user) {
+		if (!user) {
+			user = await dingding.getUser(userId);
+		}
+		let staffData = {
+			userId: user.userid,
+			userName: user.name,
+			jobnumber: user.jobnumber,
+			mobile: user.mobile,
+			avatar: user.avatar,
+			email: user.email
+		};
+
+		await DingStaffs.upsert(staffData, { where: { userId } });
+		for (let deptId of user.department) {
+			let deptInfo = await dingding.getDeptInfo(deptId);
+			if (!deptInfo) {
+				continue;
+			}
+
+			let deptPaths = await dingding.getDeptParentPath(deptId);
+			DeptStaffs.upsert({
+				userId,
+				deptId,
+				userName: user.name,
+				deptName: deptInfo.name
+			}, { where: { deptId, userId } });
+
+			await DingDepts.upsert({
+				deptId,
+				deptName: deptInfo.name,
+				parentId: deptInfo.parentid,
+				deptPaths
+			}, { where: { deptId } });
+		}
 	}
 }
 

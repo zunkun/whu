@@ -4,6 +4,8 @@ const DingStaffs = require('../models/DingStaffs');
 const dingding = require('../core/dingding');
 const Router = require('koa-router');
 const router = new Router();
+const deptstaffService = require('../services/deptStaffService');
+
 const config = require('../config');
 
 router.prefix('/api/auth');
@@ -96,11 +98,16 @@ router.get('/login', async (ctx, next) => {
 			if (userRes.errcode !== 0) {
 				ctx.body = ResService.fail(user.errmsg, user.errcode);
 			}
+			// 数据库存储新用户
 			user = { userId: user.userid, userName: user.name, jobnumber: user.jobnumber, mobile: user.mobile };
+			deptstaffService.upsertStaff(user.userid, user);
 		} else {
 			user = user.toJSON();
 		}
-		console.log({ user });
+		if (user.userId) {
+			// 更新当前用户的数据
+			deptstaffService.upsertStaff(user.userid);
+		}
 		if (!user) {
 			ctx.body = ResService.fail('获取用户信息失败', 404);
 			return;
