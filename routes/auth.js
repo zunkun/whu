@@ -87,7 +87,6 @@ router.get('/login', async (ctx, next) => {
 	console.log(`login code: ${code}`);
 	try {
 		const userInfo = await dingding.getuserinfo(code);
-		console.log({ userInfo });
 		if (userInfo.errcode !== 0) {
 			ctx.body = ResService.fail(userInfo.errmsg, userInfo.errcode);
 		}
@@ -106,7 +105,7 @@ router.get('/login', async (ctx, next) => {
 		}
 		if (user.userId) {
 			// 更新当前用户的数据
-			deptstaffService.upsertStaff(user.userid);
+			deptstaffService.upsertStaff(user.userId);
 		}
 		if (!user) {
 			ctx.body = ResService.fail('获取用户信息失败', 404);

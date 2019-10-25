@@ -3,6 +3,7 @@ const DingStaffs = require('../models/DingStaffs');
 const DeptStaffs = require('../models/DeptStaffs');
 const dingding = require('../core/dingding');
 const config = require('../config');
+const { Op } = require('sequelize');
 class DeptStaffService {
 	/**
    * @constructor
@@ -81,7 +82,6 @@ class DeptStaffService {
 			avatar: user.avatar,
 			email: user.email
 		};
-
 		await DingStaffs.upsert(staffData, { where: { userId } });
 		for (let deptId of user.department) {
 			let deptInfo = await dingding.getDeptInfo(deptId);
@@ -104,6 +104,9 @@ class DeptStaffService {
 				deptPaths
 			}, { where: { deptId } });
 		}
+
+		// 删除旧的员工部门信息
+		await DeptStaffs.destroy({ where: { userId, deptId: { [Op.notIn]: user.department } } });
 	}
 }
 
