@@ -41,10 +41,10 @@ class StructureSchedule {
 	 * @param {Number} deptId deptId
 	 */
 	async getSubDeptIds (deptId) {
-		let depts = await dingding.getDeptLists({ fetch_child: true });
+		let depts = await dingding.getDeptLists({ id: deptId, fetch_child: true });
 		let deptIds = [ deptId ];
 		for (let dept of depts) {
-			depts.push(dept.id);
+			deptIds.push(dept.id);
 		}
 		return deptIds;
 	}
