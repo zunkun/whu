@@ -36,6 +36,19 @@ class StructureSchedule {
 		console.log(`开始时间 ${new Date(this.startTime)} 结束时间 ${new Date(endTime)} 用时 ${(endTime - this.startTime) / 1000} s`);
 	}
 
+	/**
+	 * 获取所有子部门deptId列表
+	 * @param {Number} deptId deptId
+	 */
+	async getSubDeptIds (deptId) {
+		let depts = await dingding.getDeptLists({ fetch_child: true });
+		let deptIds = [ deptId ];
+		for (let dept of depts) {
+			depts.push(dept.id);
+		}
+		return deptIds;
+	}
+
 	async syncDepts () {
 		console.log('【开始】获取部门列表');
 		this.pathMap = new Map();
@@ -69,7 +82,8 @@ class StructureSchedule {
 				deptId: department.id,
 				deptName: department.name,
 				parentId: department.parentid,
-				deptPaths: this.pathMap.get(department.id) || []
+				deptPaths: this.pathMap.get(department.id) || [],
+				subdeptIds: await this.getSubDeptIds(department.id) || [ department.id ]
 			}, {
 				where: {
 					deptId: department.id
