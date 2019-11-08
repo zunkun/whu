@@ -75,6 +75,12 @@ class StructureSchedule {
 			let paths = this.getPaths(department.id, []);
 			this.pathMap.set(department.id, paths);
 		}
+		this.pathMap.set(1, [ 1 ]);
+		this.departments.push({
+			id: 1,
+			name: config.corpName,
+			parentid: 1
+		});
 
 		console.log('【开始】保存部门列表');
 		for (let department of this.departments) {
