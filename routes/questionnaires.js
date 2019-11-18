@@ -526,30 +526,23 @@ router.post('/modify', async (ctx, next) => {
 			queData.depts = [ { deptId: 1, deptName: config.corpName } ];
 		}
 	}
-	// 有投票不得更改投票标题，投票时间等信息
-	if (vote) {
-		delete queData.title;
-		delete queData.startTime;
-		delete queData.endTime;
-		delete queData.timestamp;
-	}
+
 	await Questionnaires.update(queData, { where: { id } });
 	// 有投票不得更改和删除选项
-	if (!vote) {
-		// 更新选项数据
-		const options = data.options || [];
-		for (let option of options) {
-			const optionData = { questionnaireId: questionnaire.id, timestamp };
-			[ 'sequence', 'title', 'description', 'image', 'video' ].map(key => {
-				if (option[key]) {
-					optionData[key] = option[key];
-				}
-			});
-			await QueOptions.create(optionData);
-		}
-		// 删除旧版本选项
-		await QueOptions.destroy({ where: { questionnaireId: id, timestamp: { [Op.ne]: timestamp } } });
+	// 更新选项数据
+	const options = data.options || [];
+	for (let option of options) {
+		const optionData = { questionnaireId: questionnaire.id, timestamp };
+		[ 'sequence', 'title', 'description', 'image', 'video' ].map(key => {
+			if (option[key]) {
+				optionData[key] = option[key];
+			}
+		});
+		await QueOptions.create(optionData);
 	}
+	// 删除旧版本选项
+	await QueOptions.destroy({ where: { questionnaireId: id, timestamp: { [Op.ne]: timestamp } } });
+
 	ctx.body = ResService.success({ id });
 });
 
