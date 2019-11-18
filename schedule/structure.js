@@ -6,6 +6,7 @@ const dingding = require('../core/dingding');
 const config = require('../config');
 const cron = require('node-cron');
 const moment = require('moment');
+const { Op } = require('sequelize');
 
 let total = 0;
 class StructureSchedule {
@@ -32,6 +33,7 @@ class StructureSchedule {
 	async sync () {
 		await this.syncDepts();
 		await this.syncStaffs();
+		await this.syncType();
 		let endTime = Date.now();
 		console.log(`开始时间 ${new Date(this.startTime)} 结束时间 ${new Date(endTime)} 用时 ${(endTime - this.startTime) / 1000} s`);
 	}
@@ -156,6 +158,20 @@ class StructureSchedule {
 			return Promise.resolve();
 		} catch (error) {
 			return Promise.reject(error);
+		}
+	}
+
+	async syncType () {
+		let depts = await DingDepts.findAll({ where: { parentId: 1, deptId: { [Op.ne]: 1 } } });
+		for (let dept of depts) {
+			let deptArray = await DingDepts.findAll({ where: { deptPaths: { [Op.overlap]: [ dept.deptId ] } } });
+			let deptIds = [];
+			for (let deptInfo of deptArray) {
+				deptIds.push(deptInfo.deptId);
+			}
+
+			await DingDepts.update({ typeId: dept.deptId, typeName: dept.deptName }, { where: { deptId: { [Op.in]: deptIds } } });
+			await DeptStaffs.update({ typeId: dept.deptId, typeName: dept.deptName }, { where: { deptId: { [Op.in]: deptIds } } });
 		}
 	}
 }
