@@ -523,19 +523,35 @@ router.post('/modify', async (ctx, next) => {
 		}
 	}
 
+	let vote = await Votes.findOne({ where: { questionnaireId: id } });
+	if (vote) {
+		// 有投票不得更新标题
+		delete queData.title;
+	}
+
 	await Questionnaires.update(queData, { where: { id } });
 	// 有投票不得更改和删除选项
 	// 更新选项数据
 	const options = data.options || [];
-	for (let option of options) {
-		const optionData = { questionnaireId: questionnaire.id, timestamp };
-		[ 'sequence', 'title', 'description', 'image', 'video' ].map(key => {
-			optionData[key] = option[key];
-		});
-		await QueOptions.create(optionData);
+	if (!vote) {
+		for (let option of options) {
+			const optionData = { questionnaireId: questionnaire.id, timestamp };
+			[ 'sequence', 'title', 'description', 'image', 'video' ].map(key => {
+				optionData[key] = option[key];
+			});
+			await QueOptions.create(optionData);
+		}
+		// 删除旧版本选项
+		await QueOptions.destroy({ where: { questionnaireId: id, timestamp: { [Op.ne]: timestamp } } });
+	} else {
+		for (let option of options) {
+			const optionData = { questionnaireId: id, timestamp };
+			[ 'sequence', 'title', 'description', 'image', 'video' ].map(key => {
+				optionData[key] = option[key];
+			});
+			await QueOptions.update(optionData, { where: { questionnaireId: id, sequence: option.sequence } });
+		}
 	}
-	// 删除旧版本选项
-	await QueOptions.destroy({ where: { questionnaireId: id, timestamp: { [Op.ne]: timestamp } } });
 
 	ctx.body = ResService.success({ id });
 });
