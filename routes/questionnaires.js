@@ -475,26 +475,26 @@ router.post('/modify', async (ctx, next) => {
 		ctx.body = ResService.fail('系统中没有该问卷投票');
 		return;
 	}
-	const vote = await Votes.findOne({ where: { questionnaireId: id } });
 	const timestamp = Date.now();
 	const dataKeys = new Set(Object.keys(data));
 
-	const queData = { timestamp };
+	const queData = {
+		title: data.title,
+		startTime: new Date(data.startTime),
+		endTime: new Date(data.endTime),
+		description: data.description,
+		video: data.video,
+		commentAllowed: dataKeys.has('commentAllowed') ? !!data.commentAllowed : false,
+		commentVisible: dataKeys.has('commentVisible') ? !!data.commentVisible : false,
+		anonymous: dataKeys.has('anonymous') ? !!data.anonymous : false,
+		realTimeVisiable: dataKeys.has('realTimeVisiable') ? !!data.realTimeVisiable : false,
+		selectionNum: Number(data.selectionNum) || 1,
+		timestamp
+	};
+
 	[ 'title', 'description', 'video', 'selectionNum' ].map(key => {
 		if (data[key]) queData[key] = data[key];
 	});
-
-	if (data.startTime) {
-		queData.startTime = new Date(data.startTime);
-	}
-	if (data.endTime) {
-		queData.endTime = new Date(data.endTime);
-	}
-
-	if (dataKeys.has('commentAllowed')) queData.commentAllowed = !!data.commentAllowed;
-	if (dataKeys.has('commentVisible')) queData.commentVisible = !!data.commentVisible;
-	if (dataKeys.has('anonymous')) queData.anonymous = !!data.anonymous;
-	if (dataKeys.has('realTimeVisiable')) queData.realTimeVisiable = !!data.realTimeVisiable;
 
 	const depts = [];
 	const deptIds = [];
@@ -534,9 +534,7 @@ router.post('/modify', async (ctx, next) => {
 	for (let option of options) {
 		const optionData = { questionnaireId: questionnaire.id, timestamp };
 		[ 'sequence', 'title', 'description', 'image', 'video' ].map(key => {
-			if (option[key]) {
-				optionData[key] = option[key];
-			}
+			optionData[key] = option[key];
 		});
 		await QueOptions.create(optionData);
 	}
