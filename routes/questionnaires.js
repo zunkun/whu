@@ -492,10 +492,6 @@ router.post('/modify', async (ctx, next) => {
 		timestamp
 	};
 
-	[ 'title', 'description', 'video', 'selectionNum' ].map(key => {
-		if (data[key]) queData[key] = data[key];
-	});
-
 	const depts = [];
 	const deptIds = [];
 	if (data.deptIds && data.deptIds.length) {
