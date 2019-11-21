@@ -10,6 +10,7 @@ const Votes = require('../models/Votes');
 const jwt = require('jsonwebtoken');
 const deptStaffService = require('../services/deptStaffService');
 const config = require('../config');
+const _ = require('lodash');
 router.prefix('/api/questionnaires');
 
 /**
@@ -58,11 +59,15 @@ router.prefix('/api/questionnaires');
 * @apiError {Number} errmsg 错误消息
 */
 router.get('/', async (ctx, next) => {
+	let user = jwt.decode(ctx.header.authorization.substr(7));
 	let query = ctx.query;
 	let page = Number(query.page) || 1;
 	let limit = Number(query.limit) || 10;
 	let offset = (page - 1) * limit;
-	let where = {};
+	let where = { userId: user.userId };
+	if (user.userId === '677588') {
+		delete where.userId;
+	}
 	let currentTime = new Date();
 
 	[ 'title', 'userName', 'mobile' ].map(key => {
@@ -346,12 +351,13 @@ router.post('/', async (ctx, next) => {
 });
 
 /**
-* @api {get} /api/questionnaires/:id 投票问卷信息
+* @api {get} /api/questionnaires/:id?type= 投票问卷信息
 * @apiName questionnaires-info
 * @apiGroup 投票问卷管理
 * @apiDescription 投票问卷信息
 * @apiHeader {String} authorization 登录token
 * @apiParam {Number} id 投票问卷id
+* @apiParam {Number} type 投票问卷访问权限 1-移动端查看 2-PC端管理， 默认为1
 * @apiSuccess {Number} errcode 成功为0
 * @apiSuccess {Object} data 投票问卷信息
 * @apiSuccess {Number} data.id 投票问卷活动ID
@@ -395,8 +401,33 @@ router.post('/', async (ctx, next) => {
 * @apiError {Number} errmsg 错误消息
 */
 router.get('/:id', async (ctx, next) => {
+	let user = jwt.decode(ctx.header.authorization.substr(7));
+
 	const currentTime = new Date();
+	let type = Number(ctx.query.type) || 1;
 	let que = await Questionnaires.findOne({ where: { id: ctx.params.id } });
+	if (user.userId !== '677588') {
+		if (type === 2) {
+			if (que.userId !== user.userId) {
+				ctx.body = ResService.fail('您没有权限访问该投票问卷');
+				return;
+			}
+		} else {
+			let deptIds = [];
+			const deptStaffs = await DeptStaffs.findAll({ where: { userId: user.userId } });
+			for (let deptStaff of deptStaffs) {
+				let dept = await DingDepts.findOne({ where: { deptId: deptStaff.deptId } });
+				deptIds = deptIds.concat(dept.deptPaths);
+			}
+
+			deptIds = Array.from(new Set(deptIds));
+			if (que.specialUserIds.indexOf(user.userId) === -1 && !_.intersection(que.deptIds, deptIds).length) {
+				ctx.body = ResService.fail('您没有权限访问该投票问卷');
+				return;
+			}
+		}
+	}
+
 	que = que.toJSON();
 	que.currentTime = currentTime;
 	let status;
@@ -427,11 +458,19 @@ router.get('/:id', async (ctx, next) => {
 * @apiError {Number} errmsg 错误消息
 */
 router.post('/delete', async (ctx, next) => {
+	let user = jwt.decode(ctx.header.authorization.substr(7));
+
 	const { id } = ctx.request.body;
-	if (!id) {
+	let que = await Questionnaires.findOne({ where: { id } });
+	if (!id || !id) {
 		ctx.body = ResService.fail('参数不正确');
 		return;
 	}
+	if (user.userId !== '677588' && !que.userId !== user.userId) {
+		ctx.body = ResService.fail('您没有权限删除当前投票');
+		return;
+	}
+
 	await Questionnaires.destroy({ where: { id } });
 	ctx.body = ResService.success({});
 	await next();
@@ -468,13 +507,20 @@ router.post('/delete', async (ctx, next) => {
 * @apiError {Number} errmsg 错误消息
 */
 router.post('/modify', async (ctx, next) => {
+	let user = jwt.decode(ctx.header.authorization.substr(7));
 	const data = ctx.request.body;
 	const id = data.id;
+
 	let questionnaire = await Questionnaires.findOne({ where: { id } });
 	if (!id || !questionnaire) {
 		ctx.body = ResService.fail('系统中没有该问卷投票');
 		return;
 	}
+	if (user.userId !== '677588' && user.userId !== questionnaire.userId) {
+		ctx.body = ResService.fail('您没有权限修改该投票问卷');
+		return;
+	}
+
 	const timestamp = Date.now();
 	const dataKeys = new Set(Object.keys(data));
 
@@ -556,33 +602,33 @@ router.post('/modify', async (ctx, next) => {
 	ctx.body = ResService.success({ id });
 });
 
-/**
-* @api {post} /api/questionnaires/status 【废弃】设置当前状态
-* @apiName questionnaires-status
-* @apiDeprecated 请查看(#投票问卷管理:questionnaires-onoff).
-* @apiGroup 投票问卷管理
-* @apiDescription 设置当前状态 当前投票问卷数据状态 1-上架 2-下架，新的为 onoff
-* @apiHeader {String} authorization 登录token
-* @apiParam {Number[]} questionnaireIds 投票问卷id表，例如 [1,2,3]
-* @apiParam {Number} status 1-上架 2-下架
-* @apiSuccess {Number} errcode 成功为0
-* @apiSuccess {Object} data {}
-* @apiError {Number} errcode 失败不为0
-* @apiError {Number} errmsg 错误消息
-*/
-router.post('/status', async (ctx, next) => {
-	const { questionnaireIds, status } = ctx.request.body;
+// /**
+// * @api {post} /api/questionnaires/status 【废弃】设置当前状态
+// * @apiName questionnaires-status
+// * @apiDeprecated 请查看(#投票问卷管理:questionnaires-onoff).
+// * @apiGroup 投票问卷管理
+// * @apiDescription 设置当前状态 当前投票问卷数据状态 1-上架 2-下架，新的为 onoff
+// * @apiHeader {String} authorization 登录token
+// * @apiParam {Number[]} questionnaireIds 投票问卷id表，例如 [1,2,3]
+// * @apiParam {Number} status 1-上架 2-下架
+// * @apiSuccess {Number} errcode 成功为0
+// * @apiSuccess {Object} data {}
+// * @apiError {Number} errcode 失败不为0
+// * @apiError {Number} errmsg 错误消息
+// */
+// router.post('/status', async (ctx, next) => {
+// 	const { questionnaireIds, status } = ctx.request.body;
 
-	return Questionnaires.update({ status: Number(status) }, { where: { id: { [Op.in]: questionnaireIds } } })
-		.then(() => {
-			ctx.body = ResService.success({});
-			next();
-		}).catch(error => {
-			console.error('设置投票问卷当前状态失败', error);
-			ctx.body = ResService.fail('设置失败');
-			next();
-		});
-});
+// 	return Questionnaires.update({ status: Number(status) }, { where: { id: { [Op.in]: questionnaireIds } } })
+// 		.then(() => {
+// 			ctx.body = ResService.success({});
+// 			next();
+// 		}).catch(error => {
+// 			console.error('设置投票问卷当前状态失败', error);
+// 			ctx.body = ResService.fail('设置失败');
+// 			next();
+// 		});
+// });
 
 /**
 * @api {post} /api/questionnaires/onoff 上架下架
@@ -599,6 +645,20 @@ router.post('/status', async (ctx, next) => {
 */
 router.post('/onoff', async (ctx, next) => {
 	const { questionnaireIds, onoff } = ctx.request.body;
+	let user = jwt.decode(ctx.header.authorization.substr(7));
+
+	let questionnaires = await Questionnaires.findOne({ where: { id: { [Op.in]: questionnaireIds } } });
+	if (!questionnaireIds.length || !questionnaires.length) {
+		ctx.body = ResService.fail('操作错误');
+		return;
+	}
+
+	for (let que of questionnaires) {
+		if (user.userId !== '677588' && que.userId !== user.userId) {
+			ctx.body = ResService.fail(`您没有权限操作${que.title}投票问卷`);
+			return;
+		}
+	}
 
 	return Questionnaires.update({ onoff: Number(onoff) }, { where: { id: { [Op.in]: questionnaireIds } } })
 		.then(() => {
@@ -627,6 +687,22 @@ router.post('/onoff', async (ctx, next) => {
 router.post('/top', async (ctx, next) => {
 	let { questionnaireIds, top } = ctx.request.body;
 	top = !!top;
+
+	let user = jwt.decode(ctx.header.authorization.substr(7));
+
+	let questionnaires = await Questionnaires.findOne({ where: { id: { [Op.in]: questionnaireIds } } });
+	if (!questionnaireIds.length || !questionnaires.length) {
+		ctx.body = ResService.fail('操作错误');
+		return;
+	}
+
+	for (let que of questionnaires) {
+		if (user.userId !== '677588' && que.userId !== user.userId) {
+			ctx.body = ResService.fail(`您没有权限操作${que.title}投票问卷`);
+			return;
+		}
+	}
+
 	return Questionnaires.update({ top }, { where: { id: { [Op.in]: questionnaireIds } } })
 		.then(() => {
 			ctx.body = ResService.success({});

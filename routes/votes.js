@@ -8,6 +8,10 @@ const QueOptions = require('../models/QueOptions');
 const jwt = require('jsonwebtoken');
 const moment = require('moment');
 const voteSet = new Set();
+const DingDepts = require('../models/DingDepts');
+const DeptStaffs = require('../models/DeptStaffs');
+const _ = require('lodash');
+
 router.prefix('/api/votes');
 
 /**
@@ -29,10 +33,24 @@ router.prefix('/api/votes');
 router.post('/', async (ctx, next) => {
 	let user = jwt.decode(ctx.header.authorization.substr(7));
 	const data = ctx.request.body;
-	if (!data.questionnaireId || !Array.isArray(data.checkedIds) || !data.checkedIds.length) {
+	let que = await Questionnaires.findOne({ where: { id: data.questionnaireId } });
+	if (!data.questionnaireId || !Array.isArray(data.checkedIds) || !data.checkedIds.length || !que) {
 		ctx.body = ResService.fail('参数不正确');
 		return;
 	}
+	let deptIds = [];
+	const deptStaffs = await DeptStaffs.findAll({ where: { userId: user.userId } });
+	for (let deptStaff of deptStaffs) {
+		let dept = await DingDepts.findOne({ where: { deptId: deptStaff.deptId } });
+		deptIds = deptIds.concat(dept.deptPaths);
+	}
+
+	deptIds = Array.from(new Set(deptIds));
+	if (que.specialUserIds.indexOf(user.userId) === -1 && !_.intersection(que.deptIds, deptIds).length) {
+		ctx.body = ResService.fail('您没有权限访问该投票问卷');
+		return;
+	}
+
 	// 去除重复提交
 	const voteStr = `${user.userId}:${data.questionnaireId}`;
 	if (voteSet.has(voteStr)) {
@@ -113,6 +131,21 @@ router.get('/info', async (ctx, next) => {
 	let user = jwt.decode(ctx.header.authorization.substr(7));
 	const { questionnaireId } = ctx.query;
 
+	let que = await Questionnaires.findOne({ where: { id: questionnaireId } });
+
+	let deptIds = [];
+	const deptStaffs = await DeptStaffs.findAll({ where: { userId: user.userId } });
+	for (let deptStaff of deptStaffs) {
+		let dept = await DingDepts.findOne({ where: { deptId: deptStaff.deptId } });
+		deptIds = deptIds.concat(dept.deptPaths);
+	}
+
+	deptIds = Array.from(new Set(deptIds));
+	if (que.specialUserIds.indexOf(user.userId) === -1 && !_.intersection(que.deptIds, deptIds).length) {
+		ctx.body = ResService.fail('您没有权限访问该投票问卷');
+		return;
+	}
+
 	return Votes.findOne({ where: { questionnaireId, userId: user.userId } })
 		.then(vote => {
 			ctx.body = ResService.success(vote);
@@ -184,11 +217,23 @@ router.get('/comments', async (ctx, next) => {
 * @apiError {Number} errmsg 错误消息
 */
 router.post('/commentStatus', async (ctx, next) => {
+	let user = jwt.decode(ctx.header.authorization.substr(7));
 	const { voteId, status } = ctx.request.body;
-	if (!voteId || !status) {
+	let vote = await Votes.findOne({ where: { id: voteId } });
+	if (!voteId || !status || !vote) {
 		ctx.body = ResService.fail('参数错误');
 		return;
 	}
+	let que = await Questionnaires.findOne({ where: { id: vote.questionnaireId } });
+	if (!que) {
+		ctx.body = ResService.fail('参数错误');
+		return;
+	}
+	if (user.userId !== '677588' && user.userId !== que.userId) {
+		ctx.body = ResService.fail('您没有权限访问该评论');
+		return;
+	}
+
 	await Votes.update({ commentStatus: Number(status) }, { where: { id: voteId } });
 	ctx.body = ResService.success({});
 	await next();
