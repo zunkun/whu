@@ -405,7 +405,12 @@ router.get('/:id', async (ctx, next) => {
 
 	const currentTime = new Date();
 	let type = Number(ctx.query.type) || 1;
-	let que = await Questionnaires.findOne({ where: { id: ctx.params.id } });
+	let id = Number(ctx.params.id);
+	let que = await Questionnaires.findOne({ where: { id } });
+	if (!que) {
+		ctx.body = ResService.fail('参数错误');
+		return;
+	}
 	if (user.userId !== '677588') {
 		if (type === 2) {
 			if (que.userId !== user.userId) {
