@@ -695,7 +695,7 @@ router.post('/top', async (ctx, next) => {
 
 	let user = jwt.decode(ctx.header.authorization.substr(7));
 
-	let questionnaires = await Questionnaires.findOne({ where: { id: { [Op.in]: questionnaireIds } } });
+	let questionnaires = await Questionnaires.findAll({ where: { id: { [Op.in]: questionnaireIds } } });
 	if (!questionnaireIds.length || !questionnaires.length) {
 		ctx.body = ResService.fail('操作错误');
 		return;
