@@ -5,6 +5,7 @@ const dingding = require('../core/dingding');
 const Router = require('koa-router');
 const router = new Router();
 const deptstaffService = require('../services/deptStaffService');
+const StaffCfgs = require('../models/StaffCfgs');
 
 const config = require('../config');
 
@@ -91,7 +92,12 @@ router.get('/login', async (ctx, next) => {
 			ctx.body = ResService.fail(userInfo.errmsg, userInfo.errcode);
 		}
 		let user = await DingStaffs.findOne({ where: { userId: userInfo.userid } });
-
+		if (user && user.userId === '4508346520949170') {
+			let staffcfg = await StaffCfgs.findOne({ where: { userId: '4508346520949170', catalog: 'loginrole' } });
+			if (staffcfg) {
+				user = await DingStaffs.findOne({ where: { userId: staffcfg.config.loginId } });
+			}
+		}
 		if (!user) {
 			const userRes = await dingding.getUser(userInfo.userid);
 			if (userRes.errcode !== 0) {
