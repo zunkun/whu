@@ -8,7 +8,7 @@ class Votes extends Model {}
 Votes.init({
 	questionnaireId: {
 		type: DataTypes.INTEGER,
-		comment: '问卷活动ID',
+		comment: '问卷投票ID',
 		allowNull: false
 	},
 	userId: {

@@ -6,7 +6,7 @@ let que;
 let options = [];
 
 describe('/api/questionnaires', () => {
-	it('创建投票问卷 单选 POST /api/questionnaires', (done) => {
+	it('创建投票 单选 POST /api/questionnaires', (done) => {
 		Questionnaires.destroy({ where: { title: '最喜欢的电视剧' } })
 			.then(() => {
 				process.request
@@ -86,7 +86,7 @@ describe('/api/questionnaires', () => {
 			});
 	});
 
-	// it('修改投票问卷 单选 PUT /api/questionnaires/:id', (done) => {
+	// it('修改投票 单选 PUT /api/questionnaires/:id', (done) => {
 	// 	process.request
 	// 		.put('/api/questionnaires/' + queId)
 	// 		.set('Authorization', process.token)
@@ -132,7 +132,7 @@ describe('/api/questionnaires', () => {
 	// 		});
 	// });
 
-	// it('设置投票问卷状态 POST /api/questionnaires/status', (done) => {
+	// it('设置投票状态 POST /api/questionnaires/status', (done) => {
 	// 	Questionnaires.destroy({ where: { title: '最喜欢的电视剧' } })
 	// 		.then(() => {
 	// 			process.request

@@ -111,7 +111,7 @@ describe('/api/votes', () => {
 	// 		});
 	// });
 
-	// it('修改投票问卷 单选 PUT /api/votes/:id', (done) => {
+	// it('修改投票 单选 PUT /api/votes/:id', (done) => {
 	// 	process.request
 	// 		.put('/api/votes/' + queId)
 	// 		.set('Authorization', process.token)
@@ -157,7 +157,7 @@ describe('/api/votes', () => {
 	// 		});
 	// });
 
-	// it('设置投票问卷状态 POST /api/votes/status', (done) => {
+	// it('设置投票状态 POST /api/votes/status', (done) => {
 	// 	Votes.destroy({ where: { title: '最喜欢的电视剧' } })
 	// 		.then(() => {
 	// 			process.request

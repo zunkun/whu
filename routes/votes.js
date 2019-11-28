@@ -20,13 +20,13 @@ router.prefix('/api/votes');
 * @apiGroup 投票管理
 * @apiDescription 投票
 * @apiHeader {String} authorization 登录token
-* @apiParam {Number} questionnaireId 活动ID
+* @apiParam {Number} questionnaireId 投票ID
 * @apiParam {Number[]} checkedIds 投票选项ID, 示例单选 [1],多选 [1, 2, 3]
 
 * @apiParam {String} [comment] 评论
 * @apiSuccess {Number} errcode 成功为0
-* @apiSuccess {Object} data 投票问卷信息
-* @apiSuccess {Number} data.id 投票问卷ID
+* @apiSuccess {Object} data 投票信息
+* @apiSuccess {Number} data.id 投票ID
 * @apiError {Number} errcode 失败不为0
 * @apiError {Number} errmsg 错误消息
 */
@@ -47,7 +47,7 @@ router.post('/', async (ctx, next) => {
 
 	deptIds = Array.from(new Set(deptIds));
 	if (que.specialUserIds.indexOf(user.userId) === -1 && !_.intersection(que.deptIds, deptIds).length) {
-		ctx.body = ResService.fail('您没有权限访问该投票问卷');
+		ctx.body = ResService.fail('您没有权限访问该投票');
 		return;
 	}
 
@@ -76,12 +76,12 @@ router.post('/', async (ctx, next) => {
 	return Votes.findOne({ where: { questionnaireId: data.questionnaireId, userId: user.userId } })
 		.then(vote => {
 			if (vote) {
-				return Promise.reject('您已对当前问卷投票做了投票');
+				return Promise.reject('您已对当前投票做了投票');
 			}
 			return Questionnaires.findOne({ where: { id: data.questionnaireId } })
 				.then(que => {
 					if (!que) {
-						return Promise.reject('系统中没有当前问卷');
+						return Promise.reject('系统中没有当前投票');
 					}
 					if (voteTime < que.startTime || voteTime > que.endTime) {
 						return Promise.reject('不在投票区间');
@@ -109,13 +109,13 @@ router.post('/', async (ctx, next) => {
 * @api {get} /api/votes/info?questionnaireId= 获取投票结果
 * @apiName votes-info
 * @apiGroup 投票管理
-* @apiDescription 获取人员对某一活动的投票结果
+* @apiDescription 获取人员对某一投票的投票结果
 * @apiHeader {String} authorization 登录token
-* @apiParam {Number} questionnaireId 活动ID
+* @apiParam {Number} questionnaireId 投票ID
 * @apiSuccess {Number} errcode 成功为0
 * @apiSuccess {Object} data 投票结果数据
 * @apiSuccess {Number} data.id 投票结果ID
-* @apiSuccess {Number} data.questionnaireId 投票活动ID
+* @apiSuccess {Number} data.questionnaireId 投票投票ID
 * @apiSuccess {String} data.userId 投票人userId
 * @apiSuccess {String} data.userName 投票人姓名
 * @apiSuccess {String} data.mobile 投票人员手机
@@ -142,7 +142,7 @@ router.get('/info', async (ctx, next) => {
 
 	deptIds = Array.from(new Set(deptIds));
 	if (que.specialUserIds.indexOf(user.userId) === -1 && !_.intersection(que.deptIds, deptIds).length) {
-		ctx.body = ResService.fail('您没有权限访问该投票问卷');
+		ctx.body = ResService.fail('您没有权限访问该投票');
 		return;
 	}
 
@@ -164,7 +164,7 @@ router.get('/info', async (ctx, next) => {
 * @apiGroup 投票管理
 * @apiDescription 投票评论表
 * @apiHeader {String} authorization 登录token
-* @apiParam {Number} questionnaireId 问卷活动ID
+* @apiParam {Number} questionnaireId 问卷投票ID
 * @apiParam {Number} [limit] 分页条数，默认10
 * @apiParam {Number} [page] 第几页，默认1
 * @apiParam {Number} [status] 评论状态 0-已提交 1-通过 2-未通过 3-已删除
@@ -172,7 +172,7 @@ router.get('/info', async (ctx, next) => {
 * @apiSuccess {Number} data.count 总共评论条数
 * @apiSuccess {Object[]} data.rows 当前页评论列表
 * @apiSuccess {Number} data.rows.id 投票结果ID
-* @apiSuccess {Number} data.rows.questionnaireId 投票活动ID
+* @apiSuccess {Number} data.rows.questionnaireId 投票投票ID
 * @apiSuccess {String} data.rows.userId 投票人userId
 * @apiSuccess {String} data.rows.userName 投票人姓名
 * @apiSuccess {String} data.rows.mobile 投票人员手机
@@ -245,7 +245,7 @@ router.post('/commentStatus', async (ctx, next) => {
 * @apiGroup 投票管理
 * @apiDescription 投票结果统计，显示所有选项参与投票的人员信息统计
 * @apiHeader {String} authorization 登录token
-* @apiParam {Number} questionnaireId 问卷活动ID
+* @apiParam {Number} questionnaireId 问卷投票ID
 * @apiSuccess {Object} data 返回数据
 * @apiSuccess {Number} data.ticketCount 总票数
 * @apiSuccess {Number} data.personCount 参与投票人数
@@ -267,7 +267,7 @@ router.post('/commentStatus', async (ctx, next) => {
 
 * @apiSuccess {Object[]} data.options.votes 当前选项投票评论列表
 * @apiSuccess {Number} data.options.votes.id 投票结果ID
-* @apiSuccess {Number} data.options.votes.questionnaireId 投票活动ID
+* @apiSuccess {Number} data.options.votes.questionnaireId 投票投票ID
 * @apiSuccess {String} data.options.votes.userId 投票人userId
 * @apiSuccess {String} data.options.votes.userName 投票人姓名
 * @apiSuccess {String} data.options.votes.mobile 投票人员手机
@@ -322,7 +322,7 @@ router.get('/options', async (ctx, next) => {
 * @apiGroup 投票管理
 * @apiDescription 导出投票结果,只返回前端评论列表，由前端生成Excel表
 * @apiHeader {String} authorization 登录token
-* @apiParam {Number} questionnaireId 问卷活动ID
+* @apiParam {Number} questionnaireId 问卷投票ID
 * @apiSuccess {Object} data 返回数据
 * @apiSuccess {String} data['评论人'] 评论人
 * @apiSuccess {String} data['评论时间'] 评论时间
@@ -354,10 +354,10 @@ router.get('/commentsOut', async (ctx, next) => {
 * @apiParam {Number} [limit] 分页条数，默认10
 * @apiParam {Number} [page] 第几页，默认1
 * @apiSuccess {Number} errcode 成功为0
-* @apiSuccess {Object} data 投票问卷列表
-* @apiSuccess {Number} data.count 投票问卷总数
-* @apiSuccess {Object[]} data.rows 当前页投票问卷列表
-* @apiSuccess {String} data.rows.title 投票问卷活动标题
+* @apiSuccess {Object} data 投票列表
+* @apiSuccess {Number} data.count 投票总数
+* @apiSuccess {Object[]} data.rows 当前页投票列表
+* @apiSuccess {String} data.rows.title 投票投票标题
 * @apiSuccess {Number} data.rows.voteCount 当前已投票人数
 * @apiSuccess {String} data.rows.description 描述
 * @apiSuccess {String} data.rows.startTime 开始时间

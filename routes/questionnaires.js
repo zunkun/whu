@@ -14,14 +14,14 @@ const _ = require('lodash');
 router.prefix('/api/questionnaires');
 
 /**
-* @api {get} /api/questionnaires?limit=&page=&title=&status=&userName=&mobile=startDate=endDate=&startTime=&endTime= 投票问卷列表
+* @api {get} /api/questionnaires?limit=&page=&title=&status=&userName=&mobile=startDate=endDate=&startTime=&endTime= 投票列表
 * @apiName questionnaires-lists
-* @apiGroup 投票问卷管理
-* @apiDescription 投票问卷列表
+* @apiGroup 投票管理
+* @apiDescription 投票列表
 * @apiHeader {String} authorization 登录token
 * @apiParam {Number} [limit] 分页条数，默认10
 * @apiParam {Number} [page] 第几页，默认1
-* @apiParam {String} [title] 活动标题
+* @apiParam {String} [title] 投票标题
 * @apiParam {Number} [onoff] 上架下架状态 0-上架下架未设置 1-已上架 2-已下架，不填写表示所有的
 * @apiParam {Number} [status] 状态，0-未开始 1-进行中 2-已结束
 * @apiParam {String} [userName] 发起人姓名
@@ -31,10 +31,10 @@ router.prefix('/api/questionnaires');
 * @apiParam {String} [startTime] 开始日期,格式 2019-09-24 08:00:00
 * @apiParam {String} [endTime] 截止日期，格式 2019-09-24 08:00:00
 * @apiSuccess {Number} errcode 成功为0
-* @apiSuccess {Object} data 投票问卷列表
-* @apiSuccess {Number} data.count 投票问卷总数
-* @apiSuccess {Object[]} data.rows 当前页投票问卷列表
-* @apiSuccess {String} data.rows.title 投票问卷活动标题
+* @apiSuccess {Object} data 投票列表
+* @apiSuccess {Number} data.count 投票总数
+* @apiSuccess {Object[]} data.rows 当前页投票列表
+* @apiSuccess {String} data.rows.title 投票投票标题
 * @apiSuccess {Number} data.rows.voteCount 当前已投票人数
 * @apiSuccess {Boolean} data.rows.top 是否置顶， true置顶 false不置顶
 * @apiSuccess {String} data.rows.description 描述
@@ -145,19 +145,19 @@ router.get('/', async (ctx, next) => {
 });
 
 /**
-* @api {get} /api/questionnaires/ques?limit=&page=&status= 我可以参与的投票问卷列表
+* @api {get} /api/questionnaires/ques?limit=&page=&status= 我可以参与的投票列表
 * @apiName questionnaires-ques
-* @apiGroup 投票问卷管理
-* @apiDescription 查询我可以参与的投票问卷列表，本接口查询都是上线的投票问卷
+* @apiGroup 投票管理
+* @apiDescription 查询我可以参与的投票列表，本接口查询都是上线的投票
 * @apiHeader {String} authorization 登录token
 * @apiParam {Number} [limit] 分页条数，默认10
 * @apiParam {Number} [page] 第几页，默认1
 * @apiParam {Number} [status] 状态，0-未开始 1-进行中 2-已结束,默认为1
 * @apiSuccess {Number} errcode 成功为0
-* @apiSuccess {Object} data 投票问卷列表
-* @apiSuccess {Number} data.count 投票问卷总数
-* @apiSuccess {Object[]} data.rows 当前页投票问卷列表
-* @apiSuccess {String} data.rows.title 投票问卷活动标题
+* @apiSuccess {Object} data 投票列表
+* @apiSuccess {Number} data.count 投票总数
+* @apiSuccess {Object[]} data.rows 当前页投票列表
+* @apiSuccess {String} data.rows.title 投票投票标题
 * @apiSuccess {Number} data.rows.voteCount 当前投票人数
 * @apiSuccess {Boolean} data.rows.top 是否置顶， true置顶 false不置顶
 * @apiSuccess {String} data.rows.description 描述
@@ -233,12 +233,12 @@ router.get('/ques', async (ctx, next) => {
 });
 
 /**
-* @api {post} /api/questionnaires 创建投票问卷
+* @api {post} /api/questionnaires 创建投票
 * @apiName questionnaires-create
-* @apiGroup 投票问卷管理
-* @apiDescription 创建投票问卷
+* @apiGroup 投票管理
+* @apiDescription 创建投票
 * @apiHeader {String} authorization 登录token
-* @apiParam {String} title 活动标题
+* @apiParam {String} title 投票标题
 * @apiParam {Date} startTime 开始时间 格式 2019-08-23 08:00:00
 * @apiParam {Date} endTime 截止时间 格式 2019-08-24 08:00:00
 * @apiParam {Object[]} options 问卷选项详细信息
@@ -257,8 +257,8 @@ router.get('/ques', async (ctx, next) => {
 * @apiParam {Number[]} [deptIds] 参与人范围所在部门ID列表，例如[1,2,3], 不传该值则为所有部门人员都可以参与
 * @apiParam {Number[]} [specialUserIds] 特别选择参与人员userId表，例如 [1, 2, 3]，【注意】此参与人员是专指钉钉单独选择人员参与投票信息
 * @apiSuccess {Number} errcode 成功为0
-* @apiSuccess {Object} data 投票问卷信息
-* @apiSuccess {Number} data.id 投票问卷ID
+* @apiSuccess {Object} data 投票信息
+* @apiSuccess {Number} data.id 投票ID
 * @apiError {Number} errcode 失败不为0
 * @apiError {Number} errmsg 错误消息
 */
@@ -351,19 +351,19 @@ router.post('/', async (ctx, next) => {
 });
 
 /**
-* @api {get} /api/questionnaires/:id?type= 投票问卷信息
+* @api {get} /api/questionnaires/:id?type= 投票信息
 * @apiName questionnaires-info
-* @apiGroup 投票问卷管理
-* @apiDescription 投票问卷信息
+* @apiGroup 投票管理
+* @apiDescription 投票信息
 * @apiHeader {String} authorization 登录token
-* @apiParam {Number} id 投票问卷id
-* @apiParam {Number} type 投票问卷访问权限 1-移动端查看 2-PC端管理， 默认为1
+* @apiParam {Number} id 投票id
+* @apiParam {Number} type 投票访问权限 1-移动端查看 2-PC端管理， 默认为1
 * @apiSuccess {Number} errcode 成功为0
-* @apiSuccess {Object} data 投票问卷信息
-* @apiSuccess {Number} data.id 投票问卷活动ID
+* @apiSuccess {Object} data 投票信息
+* @apiSuccess {Number} data.id 投票投票ID
 * @apiSuccess {Number} data.voteCount 当前投票人数
 * @apiSuccess {Boolean} data.top 是否置顶， true置顶 false不置顶
-* @apiSuccess {String} data.title 投票问卷活动标题
+* @apiSuccess {String} data.title 投票投票标题
 * @apiSuccess {String} data.video 视屏名称
 * @apiSuccess {String} data.description 描述
 * @apiSuccess {String} data.startTime 开始时间
@@ -414,7 +414,7 @@ router.get('/:id', async (ctx, next) => {
 	if (user.userId !== '677588') {
 		if (type === 2) {
 			if (que.userId !== user.userId) {
-				ctx.body = ResService.fail('您没有权限访问该投票问卷');
+				ctx.body = ResService.fail('您没有权限访问该投票');
 				return;
 			}
 		} else {
@@ -427,7 +427,7 @@ router.get('/:id', async (ctx, next) => {
 
 			deptIds = Array.from(new Set(deptIds));
 			if (que.specialUserIds.indexOf(user.userId) === -1 && !_.intersection(que.deptIds, deptIds).length) {
-				ctx.body = ResService.fail('您没有权限访问该投票问卷');
+				ctx.body = ResService.fail('您没有权限访问该投票');
 				return;
 			}
 		}
@@ -451,12 +451,12 @@ router.get('/:id', async (ctx, next) => {
 });
 
 /**
-* @api {post} /api/questionnaires/delete 删除投票问卷
+* @api {post} /api/questionnaires/delete 删除投票
 * @apiName questionnaires-del
-* @apiGroup 投票问卷管理
-* @apiDescription 删除投票问卷
+* @apiGroup 投票管理
+* @apiDescription 删除投票
 * @apiHeader {String} authorization 登录token
-* @apiParam {Number} id 投票问卷id
+* @apiParam {Number} id 投票id
 * @apiSuccess {Number} errcode 成功为0
 * @apiSuccess {Object} data {}
 * @apiError {Number} errcode 失败不为0
@@ -482,13 +482,13 @@ router.post('/delete', async (ctx, next) => {
 });
 
 /**
-* @api {POST} /api/questionnaires/modify 修改投票问卷
+* @api {POST} /api/questionnaires/modify 修改投票
 * @apiName questionnaire-modify
-* @apiGroup 投票问卷管理
-* @apiDescription 修改投票问卷，注意如果系统中已有人投票，则不允许修改title,startTime,endTime, options等字段
+* @apiGroup 投票管理
+* @apiDescription 修改投票，注意如果系统中已有人投票，则不允许修改title,startTime,endTime, options等字段
 * @apiHeader {String} authorization 登录token
-* @apiParam {Number} id 投票问卷id
-* @apiParam {String} [title] 活动标题
+* @apiParam {Number} id 投票id
+* @apiParam {String} [title] 投票标题
 * @apiParam {Date} [startTime] 开始时间 格式 2019-08-23 08:00:00
 * @apiParam {Date} [endTime] 截止时间 格式 2019-08-24 08:00:00
 * @apiParam {String} [video] 视屏名称
@@ -518,11 +518,11 @@ router.post('/modify', async (ctx, next) => {
 
 	let questionnaire = await Questionnaires.findOne({ where: { id } });
 	if (!id || !questionnaire) {
-		ctx.body = ResService.fail('系统中没有该问卷投票');
+		ctx.body = ResService.fail('系统中没有该投票');
 		return;
 	}
 	if (user.userId !== '677588' && user.userId !== questionnaire.userId) {
-		ctx.body = ResService.fail('您没有权限修改该投票问卷');
+		ctx.body = ResService.fail('您没有权限修改该投票');
 		return;
 	}
 
@@ -607,41 +607,13 @@ router.post('/modify', async (ctx, next) => {
 	ctx.body = ResService.success({ id });
 });
 
-// /**
-// * @api {post} /api/questionnaires/status 【废弃】设置当前状态
-// * @apiName questionnaires-status
-// * @apiDeprecated 请查看(#投票问卷管理:questionnaires-onoff).
-// * @apiGroup 投票问卷管理
-// * @apiDescription 设置当前状态 当前投票问卷数据状态 1-上架 2-下架，新的为 onoff
-// * @apiHeader {String} authorization 登录token
-// * @apiParam {Number[]} questionnaireIds 投票问卷id表，例如 [1,2,3]
-// * @apiParam {Number} status 1-上架 2-下架
-// * @apiSuccess {Number} errcode 成功为0
-// * @apiSuccess {Object} data {}
-// * @apiError {Number} errcode 失败不为0
-// * @apiError {Number} errmsg 错误消息
-// */
-// router.post('/status', async (ctx, next) => {
-// 	const { questionnaireIds, status } = ctx.request.body;
-
-// 	return Questionnaires.update({ status: Number(status) }, { where: { id: { [Op.in]: questionnaireIds } } })
-// 		.then(() => {
-// 			ctx.body = ResService.success({});
-// 			next();
-// 		}).catch(error => {
-// 			console.error('设置投票问卷当前状态失败', error);
-// 			ctx.body = ResService.fail('设置失败');
-// 			next();
-// 		});
-// });
-
 /**
 * @api {post} /api/questionnaires/onoff 上架下架
 * @apiName questionnaires-onoff
-* @apiGroup 投票问卷管理
+* @apiGroup 投票管理
 * @apiDescription 上架下架
 * @apiHeader {String} authorization 登录token
-* @apiParam {Number[]} questionnaireIds 投票问卷id表，例如 [1,2,3]
+* @apiParam {Number[]} questionnaireIds 投票id表，例如 [1,2,3]
 * @apiParam {Number} onoff 1-上架 2-下架
 * @apiSuccess {Number} errcode 成功为0
 * @apiSuccess {Object} data {}
@@ -660,7 +632,7 @@ router.post('/onoff', async (ctx, next) => {
 
 	for (let que of questionnaires) {
 		if (user.userId !== '677588' && que.userId !== user.userId) {
-			ctx.body = ResService.fail(`您没有权限操作${que.title}投票问卷`);
+			ctx.body = ResService.fail(`您没有权限操作${que.title}投票`);
 			return;
 		}
 	}
@@ -670,7 +642,7 @@ router.post('/onoff', async (ctx, next) => {
 			ctx.body = ResService.success({});
 			next();
 		}).catch(error => {
-			console.error('设置投票问卷当前状态失败', error);
+			console.error('设置投票当前状态失败', error);
 			ctx.body = ResService.fail('设置失败');
 			next();
 		});
@@ -679,10 +651,10 @@ router.post('/onoff', async (ctx, next) => {
 /**
 * @api {post} /api/questionnaires/top 置顶操作
 * @apiName questionnaires-top
-* @apiGroup 投票问卷管理
+* @apiGroup 投票管理
 * @apiDescription 置顶操作
 * @apiHeader {String} authorization 登录token
-* @apiParam {Number[]} questionnaireIds 投票问卷id表，例如 [1,2,3]
+* @apiParam {Number[]} questionnaireIds 投票id表，例如 [1,2,3]
 * @apiParam {Number} [top] false-不置顶 true-置顶, 默认 false 不置顶
 * @apiSuccess {Number} errcode 成功为0
 * @apiSuccess {Object} data {}
@@ -703,7 +675,7 @@ router.post('/top', async (ctx, next) => {
 
 	for (let que of questionnaires) {
 		if (user.userId !== '677588' && que.userId !== user.userId) {
-			ctx.body = ResService.fail(`您没有权限操作${que.title}投票问卷`);
+			ctx.body = ResService.fail(`您没有权限操作${que.title}投票`);
 			return;
 		}
 	}
@@ -713,7 +685,7 @@ router.post('/top', async (ctx, next) => {
 			ctx.body = ResService.success({});
 			next();
 		}).catch(error => {
-			console.error('设置投票问卷当前状态失败', error);
+			console.error('设置投票当前状态失败', error);
 			ctx.body = ResService.fail('设置失败');
 			next();
 		});

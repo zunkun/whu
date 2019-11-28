@@ -7,7 +7,7 @@ class Questionnaires extends Model {}
 Questionnaires.init({
 	title: {
 		type: DataTypes.STRING,
-		comment: '活动标题'
+		comment: '投票标题'
 	},
 	description: {
 		type: DataTypes.TEXT,
