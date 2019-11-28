@@ -305,7 +305,7 @@ router.get('/options', async (ctx, next) => {
 			optionRes[i].percent = Number((item.count * 100 / ticketCount).toFixed(2));
 			percentCount += item.percent;
 		}
-		optionRes[optionRes.length - 1].percent = 100 - percentCount;
+		optionRes[optionRes.length - 1].percent = Number((100 - percentCount).toFixed(2));
 	}
 	let personCount = await Votes.count({ where: { questionnaireId, checkedIds: { [Op.overlap]: optionIds } } }); // 总投票人数,此处过滤掉已经删除的选项
 	ctx.body = ResService.success({
